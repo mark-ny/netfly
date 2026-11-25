@@ -1,4 +1,4 @@
-const NAME = "stillframe-static-v1";
+const NAME = "stillframe-static-v2";
 self.addEventListener("install", (e) =>
   e.waitUntil(caches.open(NAME).then((c) => c.add("/offline.html"))),
 );

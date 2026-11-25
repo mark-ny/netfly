@@ -11,6 +11,19 @@ npm run dev
 
 Open the local URL printed by Vite. With both Supabase variables empty, the eight bundled films and a browser-local profile are available. To build static files, run npm run build and npm run preview. Set VITE_SITE_ORIGIN to the full frontend origin when building a release to generate its sitemap and absolute sharing URLs.
 
+## Accounts for launching Netfly
+
+| Account or service | What to set up |
+| --- | --- |
+| Supabase | Create one project for the database, viewer accounts and staff authentication. [Supabase dashboard](https://supabase.com/dashboard) |
+| Cloudflare | Use one account for Pages (website), Workers (playback authorization) and R2 (private video storage). R2 activation requires a payment method and usage above its free allowance can incur charges. [Cloudflare dashboard](https://dash.cloudflare.com/) · [R2 setup](https://developers.cloudflare.com/r2/get-started/) |
+| Transactional email provider | Use an SMTP provider such as Resend for verification and password-reset email. Verify your sender domain and enter the provider's SMTP credentials in Supabase Auth. [Supabase SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp) |
+| Domain and DNS | Use a domain you control for the sender address and the playback hostname in this configuration. An existing registrar account works. |
+| GitHub (optional) | Use a repository for automatic tests and deployments. Manual deployment from the ZIP is supported. [GitHub](https://github.com/) |
+| Google Cloud (optional) | Set up OAuth credentials only if you enable “Sign in with Google.” [Google provider setup](https://supabase.com/docs/guides/auth/social-login/auth-google) |
+
+The private demo runs without these production accounts.
+
 ## Inventory for a connected launch
 
 | Owner supplies | Destination |

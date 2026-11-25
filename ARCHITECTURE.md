@@ -1,4 +1,4 @@
-# Stillframe architecture
+# Netfly architecture
 
 The client is a React and TypeScript single-page app built with Vite, Tailwind, locally packaged fonts, Lucide and Framer Motion. The catalog opens without loading Video.js. The player and admin dashboard load on demand. CSS handles reduced motion and horizontal shelves. The browser service worker caches versioned script, stylesheet and font assets and an offline page.
 

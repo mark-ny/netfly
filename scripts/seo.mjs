@@ -70,7 +70,7 @@ for (const m of movies) {
     template
       .replace(
         /<title>.*?<\/title>/,
-        "<title>" + escape(m.title) + " · Cinema</title>",
+        "<title>" + escape(m.title) + " · Netfly</title>",
       )
       .replace(
         /<meta name="description" content="[^"]*"\s*\/>/,

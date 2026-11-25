@@ -25,7 +25,7 @@ function useStore() {
     [session, setSession] = useState<Session | null>(null),
     [role, setRole] = useState("viewer"),
     [loadedUser, setLoadedUser] = useState<string>(),
-    [brand, setBrand] = useState("Stillframe"),
+    [brand, setBrand] = useState("Netfly"),
     [notice, setNotice] = useState(""),
     [personal, setPersonal] = useState<Personal>(demoMode ? readDemo : blank);
   const current = useRef(personal),
@@ -47,7 +47,7 @@ function useStore() {
           .select("value")
           .eq("key", "brand")
           .maybeSingle();
-        setBrand(s.data?.value?.name || "Stillframe");
+        setBrand(s.data?.value?.name || "Netfly");
       }
     } catch (e) {
       setProblem((e as Error).message);

@@ -1,4 +1,4 @@
-name = "stillframe-playback"
+name = "netfly-playback"
 main = "index.js"
 compatibility_date = "2025-09-01"
 workers_dev = false
@@ -9,7 +9,7 @@ enabled = false
 crons = ["17 * * * *"]
 [[r2_buckets]]
 binding = "MEDIA"
-bucket_name = "stillframe-private-media"
+bucket_name = "netfly-private-media"
 [[ratelimits]]
 name = "LIMITER"
 namespace_id = "1001"

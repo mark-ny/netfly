@@ -9,7 +9,7 @@ import { chromium } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import worker from "../worker/index.js";
 const suffix = randomBytes(5).toString("hex"),
-  network = "stillframe-qa-" + suffix,
+  network = "netfly-qa-" + suffix,
   containers = [],
   secret = randomBytes(40).toString("hex"),
   pw = randomBytes(22).toString("hex");
@@ -138,7 +138,7 @@ grant usage on schema auth to anon,authenticated,service_role;`);
       GOTRUE_SMTP_HOST: "mail",
       GOTRUE_SMTP_PORT: "1025",
       GOTRUE_SMTP_ADMIN_EMAIL: "cinema@example.test",
-      GOTRUE_SMTP_SENDER_NAME: "Stillframe",
+      GOTRUE_SMTP_SENDER_NAME: "Netfly",
       GOTRUE_SMTP_MAX_FREQUENCY: "1s",
       GOTRUE_MAILER_URLPATHS_CONFIRMATION: "/auth/v1/verify",
       GOTRUE_MAILER_URLPATHS_RECOVERY: "/auth/v1/verify",

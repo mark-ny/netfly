@@ -100,7 +100,7 @@ export const demos: Movie[] = titles.map(
     language: "No dialogue",
     country,
     classification: "Unrated",
-    director: "Stillframe Studio",
+    director: "Netfly Studio",
     poster: "/art/" + slug + "-poster.webp",
     backdrop: "/art/" + slug + ".webp",
     trailer: "/demo/" + slug + "/preview.mp4",

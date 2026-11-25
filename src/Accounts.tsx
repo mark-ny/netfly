@@ -187,7 +187,7 @@ export function Mfa() {
       }
       const r = await db!.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Stillframe " + Date.now(),
+        friendlyName: "Netfly " + Date.now(),
       });
       if (r.error) throw r.error;
       setFactor(r.data.id);
@@ -286,7 +286,7 @@ export function Profile() {
   async function exportData() {
     try {
       download(
-        "stillframe-data.json",
+        "netfly-data.json",
         demoMode ? personal : await callWorker("/account/export"),
       );
     } catch (e) {
@@ -397,7 +397,7 @@ export function Support() {
     setMsg("");
     try {
       if (demoMode) {
-        download("stillframe-report.json", report);
+        download("netfly-report.json", report);
         setMsg(
           "Report saved to your device. Share it with the operator of this preview.",
         );

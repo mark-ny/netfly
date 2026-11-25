@@ -1,6 +1,6 @@
 {
-  "name": "Stillframe Cinema",
-  "short_name": "Stillframe",
+  "name": "Netfly",
+  "short_name": "Netfly",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

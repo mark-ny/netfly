@@ -1,4 +1,4 @@
-# Stillframe Cinema
+# Netfly
 
 A free-viewing movie library with a React frontend, Supabase Auth and PostgreSQL, private R2 media delivery through a Cloudflare Worker, and a local FFmpeg pipeline. The included catalog contains eight original 18-second picture studies with two HLS qualities, English captions and short previews. Licensed feature films can be registered through administration.
 

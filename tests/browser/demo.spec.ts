@@ -110,7 +110,7 @@ test("personal preferences, ratings, report preparation and local export", async
   await page.getByLabel("Details").fill("The stream paused.");
   const report = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download report" }).click();
-  expect((await report).suggestedFilename()).toBe("stillframe-report.json");
+  expect((await report).suggestedFilename()).toBe("netfly-report.json");
   await page.goto("/admin");
   await expect(page.getByText(/provisioned staff account/)).toBeVisible();
 });
