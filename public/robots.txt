@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /watch/
+Disallow: /account/
+Disallow: /profile
+Disallow: /admin
+Disallow: /watchlist
+Disallow: /history
+Disallow: /login
+Disallow: /signup
+Disallow: /recover
+Disallow: /media/
+Disallow: /demo/
+Disallow: /search
+

@@ -1,0 +1,22 @@
+name: Application checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint && npm test && npm run test:db && npm run build
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - run: npm audit --omit=dev --audit-level=high
+

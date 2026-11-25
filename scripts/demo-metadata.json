@@ -1,0 +1,74 @@
+[
+  {
+    "title": "The Last Light",
+    "slug": "the-last-light",
+    "synopsis": "As the sun slips behind the acacias, a quiet road through Kenya takes on a life of its own.",
+    "genres": ["African Cinema", "Nature"],
+    "duration": 18,
+    "poster": "/art/the-last-light-poster.webp",
+    "backdrop": "/art/the-last-light.webp"
+  },
+  {
+    "title": "Blue Hours",
+    "slug": "blue-hours",
+    "synopsis": "A study of the open ocean, where light traces the restless surface of the water.",
+    "genres": ["Nature", "Documentary"],
+    "duration": 18,
+    "poster": "/art/blue-hours-poster.webp",
+    "backdrop": "/art/blue-hours.webp"
+  },
+  {
+    "title": "Above the Clouds",
+    "slug": "above-the-clouds",
+    "synopsis": "Beyond the cloud line, mountain ridges emerge in a changing field of light.",
+    "genres": ["Adventure", "Nature"],
+    "duration": 18,
+    "poster": "/art/above-the-clouds-poster.webp",
+    "backdrop": "/art/above-the-clouds.webp"
+  },
+  {
+    "title": "Between the Trees",
+    "slug": "between-the-trees",
+    "synopsis": "An unhurried passage into the forest, following the light through layers of green.",
+    "genres": ["Nature", "Documentary"],
+    "duration": 18,
+    "poster": "/art/between-the-trees-poster.webp",
+    "backdrop": "/art/between-the-trees.webp"
+  },
+  {
+    "title": "After Dark",
+    "slug": "after-dark",
+    "synopsis": "The city comes into focus after sunset, its streets redrawn in pools of electric light.",
+    "genres": ["Urban", "Documentary"],
+    "duration": 18,
+    "poster": "/art/after-dark-poster.webp",
+    "backdrop": "/art/after-dark.webp"
+  },
+  {
+    "title": "Dunes of Silence",
+    "slug": "dunes-of-silence",
+    "synopsis": "Wind and shadow carve a shifting geometry across the desert.",
+    "genres": ["Adventure", "Nature"],
+    "duration": 18,
+    "poster": "/art/dunes-of-silence-poster.webp",
+    "backdrop": "/art/dunes-of-silence.webp"
+  },
+  {
+    "title": "Falling Water",
+    "slug": "falling-water",
+    "synopsis": "A waterfall fills the frame in a close encounter with the force of moving water.",
+    "genres": ["Nature", "Documentary"],
+    "duration": 18,
+    "poster": "/art/falling-water-poster.webp",
+    "backdrop": "/art/falling-water.webp"
+  },
+  {
+    "title": "Northern Skies",
+    "slug": "northern-skies",
+    "synopsis": "A luminous night sky stretches across a landscape on the edge of darkness.",
+    "genres": ["Nature", "Adventure"],
+    "duration": 18,
+    "poster": "/art/northern-skies-poster.webp",
+    "backdrop": "/art/northern-skies.webp"
+  }
+]
