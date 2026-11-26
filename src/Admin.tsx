@@ -651,6 +651,13 @@ export default function Admin() {
                     .map((row) => (
                     <tr key={resource.keys.map((k) => row[k]).join("/")}>
                       <td>
+                        {(row.state || row.status) && (
+                          <span
+                            className={"badge " + (row.state || row.status)}
+                          >
+                            {String(row.state || row.status)}
+                          </span>
+                        )}{" "}
                         {String(
                           row.title ||
                             row.name ||

@@ -1428,3 +1428,53 @@ footer > div a {
 .filmrow:focus-within {
   scroll-behavior: smooth;
 }
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #34362f;
+  color: #dcdcd4;
+}
+.badge.published,
+.badge.resolved {
+  background: #1f3a29;
+  color: #8fe0ad;
+}
+.badge.draft,
+.badge.open {
+  background: #4a3a1a;
+  color: #f0c66b;
+}
+.badge.archived,
+.badge.reviewing {
+  background: #3a2a2a;
+  color: #e4a3a3;
+}
+/* Player skin: accent progress bar and larger touch targets */
+.screen .video-js .vjs-play-progress,
+.screen .video-js .vjs-volume-level {
+  background: var(--accent);
+}
+.screen .video-js .vjs-big-play-button {
+  background: rgba(18, 19, 18, 0.78);
+  border-color: var(--accent);
+  border-radius: 50%;
+  width: 2.6em;
+  height: 2.6em;
+  line-height: 2.5em;
+  margin-top: -1.3em;
+  margin-left: -1.3em;
+}
+.screen .video-js .vjs-control-bar {
+  background: linear-gradient(0deg, rgba(8, 9, 8, 0.92), rgba(8, 9, 8, 0));
+  height: 4em;
+}
+@media (pointer: coarse) {
+  .screen .video-js .vjs-button {
+    min-width: 3.4em;
+  }
+}

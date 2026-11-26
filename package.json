@@ -2,7 +2,7 @@
   "name": "netfly",
   "private": true,
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && node scripts/seo.mjs",

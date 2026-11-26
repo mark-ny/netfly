@@ -67,3 +67,7 @@ All changes are in the files listed above. Restore them from your original zip o
 - **Rails:** Left and Right arrow keys scroll a row when focus is inside it.
 - **Player:** added Left/Right arrow seek, M mute and F fullscreen alongside J, L, K, with a visible shortcut line. Playback still starts muted and never autoplays with sound; gateway, authorization and renewal are unchanged.
 - **Still open:** admin status badges, skeleton loaders, PWA icon refresh, player skin and quality-menu styling, auth error copy. Run the Playwright and connected suites before relying on any of this.
+
+## Round 4 (v1.4.0): batch of small items (untested in a browser)
+
+Friendlier auth error copy, admin status badges, accent-coloured player skin, PWA manifest metadata and shortcuts, version labels and `CHANGELOG.md`. Skeleton loading already existed (`.loading` pulse), so no change was made. Not done: custom PWA icon artwork (needs image tooling here), viewer profiles and series (await your approval, see NETFLY_RECOMMENDATIONS.md).

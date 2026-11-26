@@ -19,8 +19,20 @@ export function download(name: string, value: unknown) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
-const message = (e: unknown) =>
-  (e as Error).message || "The request could not be completed.";
+const message = (e: unknown) => {
+  const raw = (e as Error)?.message || "";
+  if (/invalid login/i.test(raw))
+    return "That email and password do not match. Check them or reset your password.";
+  if (/not confirmed/i.test(raw))
+    return "Verify your email first. Open the link we sent to your inbox.";
+  if (/rate limit|too many|security purposes/i.test(raw))
+    return "Too many attempts. Wait a few minutes and try again.";
+  if (/failed to fetch|network|load failed/i.test(raw))
+    return "Cannot reach Netfly. Check your connection and try again.";
+  if (/jwt|session.*(expired|missing)|not authenticated/i.test(raw))
+    return "Your session expired. Sign in again.";
+  return raw || "The request could not be completed.";
+};
 export function Auth() {
   const loc = useLocation(),
     nav = useNavigate(),
