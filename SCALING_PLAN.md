@@ -9,6 +9,7 @@ Assume six-second multiplexed HLS segments, one active rendition per viewer, 1.5
 | Simultaneous viewers | Segments, R2 GETs and Worker calls/hour, each | Segment requests/s | Progress writes/hour | Aggregate transfer rate | GB delivered/hour | Minutes to 100k segment calls |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 10 typical | 6,000 | 1.67 | 1,200 | 15 Mbit/s | 6.75 | 1,000 |
+| 20 | 12,000 | 3.33 | 2,400 | 30 Mbit/s | 13.5 | 500 |
 | 100 | 60,000 | 16.67 | 12,000 | 150 Mbit/s | 67.5 | 100 |
 | 200 | 120,000 | 33.33 | 24,000 | 300 Mbit/s | 135 | 50 |
 | 500 | 300,000 | 83.33 | 60,000 | 750 Mbit/s | 337.5 | 20 |

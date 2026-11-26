@@ -2,6 +2,10 @@
 
 Versions are documentation labels for upgrade batches. Verification status for each is in NETFLY_UPGRADE_REPORT.md.
 
+## 1.5.0 (documentation and proposals only)
+- Viewer-profiles proposal with unapplied SQL, tests and rollback (docs/proposals/)
+- 20-viewer row in SCALING_PLAN.md; storage-beyond-60-GB estimates in NETFLY_RECOMMENDATIONS.md
+
 ## 1.4.0
 - Friendlier sign-in, rate-limit, network and expired-session messages
 - Status badges in Administration; Netfly accent on the player progress bar, larger big-play and touch targets

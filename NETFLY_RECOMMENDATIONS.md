@@ -45,3 +45,25 @@ TMDB for metadata (licence and attribution rules apply, free for non-commercial 
 ## 8. Next implementation batch (once you have run the tests)
 
 Accessible admin delete dialog plus its test update; admin search and status filters; player polish and shortcut help; rail arrow-key navigation; search debounce; skeletons; PWA icon refresh; README and TESTING updates.
+
+## 9. Storage beyond 60 GB (estimates from the repo's own model)
+
+Model: three renditions total 4,088 kb/s, so a 90-minute film is about 2.90 GB plus 2 MB of ancillary files; 360p alone is about 0.50 GB per film. R2 Standard storage is $0.015 per GB-month after 10 GB free, using the pricing recorded in FREE_TIER_LIMITS.md on 25 Nov 2026. I did not re-verify provider pricing today; check the official pages before deciding.
+
+| Catalog (90-min films) | Ladder | Storage | Storage cost per month |
+|---|---|---:|---:|
+| 20 | 360, 480, 720 | about 58 GB | about $0.72 |
+| 50 | 360, 480, 720 | about 145 GB | about $2.03 |
+| 100 | 360, 480, 720 | about 290 GB | about $4.20 |
+| 100 | 360 only | about 50 GB | about $0.59 |
+| 200 | 360, 480, 720 | about 580 GB | about $8.55 |
+
+Storage is the small cost. Requests are the constraint: see the 20, 100, 200 and 500 viewer table in SCALING_PLAN.md (20 viewers is about 12,000 segment requests per hour, 500 minutes to reach 100,000 Worker calls). Options in order of least change: keep three renditions and add a paid Workers plan; drop 720p for long titles; add a short authorization cache in the Worker (takedown delay equals cache time). None is implemented.
+
+## 10. Viewer profiles proposal
+
+Detailed SQL, rules, tests and rollback are in `docs/proposals/viewer-profiles.md` and `.sql`. The SQL has not been run against any Postgres (none is available here), so treat it as a draft to test on a staging project.
+
+## 11. Neon database (you asked for a migration plan)
+
+See `docs/proposals/neon-migration.md`: options (stay on Supabase, full Neon, Neon with the existing sign-in), risks (accounts, staff MFA, Worker rewrite, free-plan compute limits under playback load) and a staged plan with rollback. Nothing has been changed.

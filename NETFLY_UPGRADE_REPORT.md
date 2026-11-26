@@ -71,3 +71,7 @@ All changes are in the files listed above. Restore them from your original zip o
 ## Round 4 (v1.4.0): batch of small items (untested in a browser)
 
 Friendlier auth error copy, admin status badges, accent-coloured player skin, PWA manifest metadata and shortcuts, version labels and `CHANGELOG.md`. Skeleton loading already existed (`.loading` pulse), so no change was made. Not done: custom PWA icon artwork (needs image tooling here), viewer profiles and series (await your approval, see NETFLY_RECOMMENDATIONS.md).
+
+## Round 5 (v1.5.0): proposals and planning numbers, no app code changed
+
+Viewer-profiles design and SQL (draft, unapplied and unrun), 20-viewer scenario row, storage-beyond-60-GB table. Computed figures: 20 viewers = 20 x 3,600 / 6 = 12,000 segments per hour; 100,000 / 12,000 x 60 = 500 minutes.
