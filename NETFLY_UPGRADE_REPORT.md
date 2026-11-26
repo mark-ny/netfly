@@ -59,3 +59,11 @@ All changes are in the files listed above. Restore them from your original zip o
 - `tests/browser/demo.spec.ts` was rewritten for the empty preview (navigation, empty states, mobile layout, offline fallback, local profile). The earlier film-specific browser tests were dropped. **Not run.**
 - Nothing in your database, R2 bucket, migrations, `tools/ingest.py` or the Worker was changed. Existing demo rows in a live database (if you ever seeded them) are untouched; archive them in Administration if you want them gone.
 - With no Supabase variables, the home page now shows "The program is being prepared". Connected mode is unchanged.
+
+## Round 3: admin, search, rails and player (untested in a browser)
+
+- **Admin:** deleting a record now opens an accessible confirmation dialog ("Delete permanently" / Cancel, Escape closes) instead of the browser confirm box. A "Filter this page" box narrows the 25 records currently shown (client-side, current page only). The connected test was updated to click the new button.
+- **Search:** typing is debounced by 250 ms before the URL updates, so shared search links still work.
+- **Rails:** Left and Right arrow keys scroll a row when focus is inside it.
+- **Player:** added Left/Right arrow seek, M mute and F fullscreen alongside J, L, K, with a visible shortcut line. Playback still starts muted and never autoplays with sound; gateway, authorization and renewal are unchanged.
+- **Still open:** admin status badges, skeleton loaders, PWA icon refresh, player skin and quality-menu styling, auth error copy. Run the Playwright and connected suites before relying on any of this.

@@ -200,6 +200,8 @@ export default function Admin() {
     [draft, edit] = useState<Row | null>(null),
     [original, setOriginal] = useState<Row | null>(null),
     [message, setMessage] = useState(""),
+    [pending, setPending] = useState<Row | null>(null),
+    [find, setFind] = useState(""),
     [page, setPage] = useState(0),
     [busy, setBusy] = useState(false),
     [verified, setVerified] = useState(false),
@@ -370,14 +372,13 @@ export default function Admin() {
       ),
     );
   }
-  async function remove(row: Row) {
-    if (
-      !resource ||
-      !confirm(
-        "Permanently delete this " + resource.label.toLowerCase() + " record?",
-      )
-    )
-      return;
+  function remove(row: Row) {
+    setPending(row);
+  }
+  async function confirmRemove() {
+    const row = pending;
+    setPending(null);
+    if (!resource || !row) return;
     const r = await db!
       .from(tab)
       .delete()
@@ -587,6 +588,45 @@ export default function Admin() {
               </div>
             </form>
           )}
+          <label className="small">
+            Filter this page
+            <input
+              value={find}
+              onChange={(e) => setFind(e.target.value)}
+              placeholder="Type to filter the records shown below"
+            />
+          </label>
+          {pending && resource && (
+            <div
+              className="dialog"
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="del-title"
+              onKeyDown={(e) => e.key === "Escape" && setPending(null)}
+            >
+              <div className="dialog-box">
+                <h3 id="del-title">
+                  Delete this {resource.label.toLowerCase()} record?
+                </h3>
+                <p className="small">
+                  This cannot be undone. Related records may block the deletion,
+                  and stored media files are never removed from here.
+                </p>
+                <div className="actions">
+                  <button
+                    className="primary"
+                    autoFocus
+                    onClick={() => void confirmRemove()}
+                  >
+                    Delete permanently
+                  </button>
+                  <button className="ghost" onClick={() => setPending(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {busy ? (
             <p role="status">Loading…</p>
           ) : (
@@ -600,7 +640,15 @@ export default function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row) => (
+                  {rows
+                    .filter(
+                      (row) =>
+                        !find ||
+                        JSON.stringify(row)
+                          .toLowerCase()
+                          .includes(find.toLowerCase()),
+                    )
+                    .map((row) => (
                     <tr key={resource.keys.map((k) => row[k]).join("/")}>
                       <td>
                         {String(

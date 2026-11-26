@@ -238,16 +238,23 @@ export default function Player({ m }: { m: Movie }) {
             e.target instanceof HTMLSelectElement
           )
             return;
-          if (["j", "l", "k"].includes(e.key.toLowerCase())) {
+          const k = e.key.toLowerCase(),
+            p = player.current;
+          if (["j", "l", "k", "f", "m", "arrowleft", "arrowright"].includes(k)) {
             e.preventDefault();
-            if (e.key === "j") skip(-10);
-            else if (e.key === "l") skip(10);
-            else if (player.current?.paused()) player.current.play();
-            else player.current?.pause();
+            if (k === "j" || k === "arrowleft") skip(-10);
+            else if (k === "l" || k === "arrowright") skip(10);
+            else if (k === "f" && p) {
+              if (p.isFullscreen()) void p.exitFullscreen();
+              else void p.requestFullscreen();
+            }
+            else if (k === "m" && p) p.muted(!p.muted());
+            else if (k === "k" && p?.paused()) p.play()?.catch(() => {});
+            else if (k === "k") p?.pause();
           }
         }}
         tabIndex={0}
-        aria-label="Film player. J and L skip ten seconds. K toggles playback."
+        aria-label="Film player. J or Left arrow back ten seconds, L or Right arrow forward ten seconds, K play or pause, M mute, F fullscreen."
       />
       <div className="playertools">
         <button onClick={() => skip(-10)}>
@@ -273,6 +280,10 @@ export default function Player({ m }: { m: Movie }) {
           Report an issue
         </Link>
       </div>
+      <p className="small shortcuts">
+        Shortcuts: K play/pause · J / ← back 10s · L / → forward 10s · M mute ·
+        F fullscreen
+      </p>
       <p className="small">{m.synopsis}</p>
     </div>
   );

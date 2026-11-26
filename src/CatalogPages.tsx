@@ -116,7 +116,18 @@ function Shelf({
         </Link>
       </div>
       <div className="shelfwrap">
-        <div className="filmrow" ref={ref}>
+        <div
+          className="filmrow"
+          ref={ref}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+            const el = ref.current!;
+            el.scrollBy({
+              left: (e.key === "ArrowRight" ? 1 : -1) * el.clientWidth * 0.5,
+              behavior: "smooth",
+            });
+          }}
+        >
           {movies.map((m) => (
             <MovieCard key={m.id} m={m} />
           ))}
@@ -381,7 +392,14 @@ export function Listing() {
     lang = params.get("language") || "",
     page = Math.max(1, Number(params.get("page")) || 1),
     sort = params.get("sort") || "",
-    collection = params.get("collection") || "";
+    collection = params.get("collection") || "",
+    [term, setTerm] = useState(q);
+  useEffect(() => setTerm(q), [q]);
+  useEffect(() => {
+    if (term === q) return;
+    const t = setTimeout(() => put("q", term), 250);
+    return () => clearTimeout(t);
+  }, [term]);
   function put(key: string, val: string) {
     const p = new URLSearchParams(params);
     p.delete("page");
@@ -458,8 +476,8 @@ export function Listing() {
             aria-label="Search films"
             autoFocus={section === "search"}
             placeholder="Search by title, genre or cast"
-            value={q}
-            onChange={(e) => put("q", e.target.value)}
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
           />
           {q && (
             <button aria-label="Clear search" onClick={() => put("q", "")}>

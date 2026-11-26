@@ -1399,3 +1399,32 @@ footer > div a {
   color: var(--muted);
   line-height: 1.55;
 }
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 9, 8, 0.72);
+  padding: 20px;
+}
+.dialog-box {
+  max-width: 440px;
+  width: 100%;
+  background: #1b1c1a;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+.dialog-box h3 {
+  margin: 0 0 10px;
+}
+.shortcuts {
+  color: var(--muted);
+}
+.tablewrap table {
+  min-width: 520px;
+}
+.filmrow:focus-within {
+  scroll-behavior: smooth;
+}

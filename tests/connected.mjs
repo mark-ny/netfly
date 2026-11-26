@@ -435,12 +435,12 @@ grant usage on schema auth to anon,authenticated,service_role;`);
   await row.getByRole("button", { name: "Edit" }).click();
   await staff.getByLabel("name", { exact: true }).fill("Updated test genre");
   await staff.getByRole("button", { name: "Save record" }).click();
-  staff.once("dialog", (d) => d.accept());
   await staff
     .getByRole("row")
     .filter({ hasText: "Updated test genre" })
     .getByRole("button", { name: "Delete" })
     .click();
+  await staff.getByRole("button", { name: "Delete permanently" }).click();
   await until(
     async () =>
       !(
