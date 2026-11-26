@@ -16,7 +16,8 @@ Open the local URL printed by Vite. With both Supabase variables empty, the eigh
 | Account or service | What to set up |
 | --- | --- |
 | Supabase | Create one project for the database, viewer accounts and staff authentication. [Supabase dashboard](https://supabase.com/dashboard) |
-| Cloudflare | Use one account for Pages (website), Workers (playback authorization) and R2 (private video storage). R2 activation requires a payment method and usage above its free allowance can incur charges. [Cloudflare dashboard](https://dash.cloudflare.com/) · [R2 setup](https://developers.cloudflare.com/r2/get-started/) |
+| Vercel | Create or select the Netfly Vite project for the website, previews and optional frontend domain. [Vercel dashboard](https://vercel.com/dashboard) |
+| Cloudflare | Use one account for Workers (playback authorization) and R2 (private video storage). R2 activation requires a payment method and usage above its free allowance can incur charges. [Cloudflare dashboard](https://dash.cloudflare.com/) · [R2 setup](https://developers.cloudflare.com/r2/get-started/) |
 | Transactional email provider | Use an SMTP provider such as Resend for verification and password-reset email. Verify your sender domain and enter the provider's SMTP credentials in Supabase Auth. [Supabase SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp) |
 | Domain and DNS | Use a domain you control for the sender address and the playback hostname in this configuration. An existing registrar account works. |
 | GitHub (optional) | Use a repository for automatic tests and deployments. Manual deployment from the ZIP is supported. [GitHub](https://github.com/) |
@@ -33,7 +34,7 @@ The private demo runs without these production accounts.
 | Optional Google OAuth client and callback registration | Supabase Auth provider settings |
 | Cloudflare account, approved R2 subscription, private bucket and least-privilege upload key | Worker R2 binding and local ingestion environment |
 | Cloudflare account ID and scoped deployment token | GitHub production environment or local Wrangler login |
-| Frontend domain, playback domain and a licensed media inventory | Pages, Worker routes and administration |
+| Frontend domain, playback domain and a licensed media inventory | Vercel, Worker routes and administration |
 | First verified operator account and authenticator | Supabase SQL bootstrap and Profile |
 | GitHub repository and deployment environment | Push the supplied source to your chosen repository. Automated checks run there. |
 
@@ -57,18 +58,19 @@ Verify one returned row. Sign in, enroll TOTP under Profile and verify the code.
 
 ## 2. Configure the gateway
 
-1. After cost approval, create the private R2 bucket and disable public URL access. Configure its existing name in worker/wrangler.toml. Keep media in R2 and static artwork in Pages or an approved public image host.
+1. After cost approval, create the private R2 bucket and disable public URL access. Configure its existing name in worker/wrangler.toml. Keep media in R2 and static artwork on Vercel or an approved public image host.
 2. Configure a dedicated Worker custom domain or route. In worker/wrangler.toml add a Cloudflare route appropriate for your zone, or add a custom domain in the dashboard after creating the Worker. The supplied config disables workers.dev and preview URLs. Set APP_ORIGIN to the exact frontend origin with no trailing slash and SUPABASE_URL to the project URL. Keep the two rate-limit bindings and the hourly maintenance trigger enabled.
 3. For an existing approved Worker set the service-role secret with npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config worker/wrangler.toml. Use the provider prompt to enter it. Deploy with npx wrangler deploy --config worker/wrangler.toml --keep-vars --var "APP_ORIGIN:$VITE_SITE_ORIGIN" --var "SUPABASE_URL:$VITE_SUPABASE_URL". Check the route's TLS certificate, trigger schedule and exact origin. Disable URL logging, caching rules and media analytics that capture request paths.
 4. Keep bucket-scoped S3 keys in the local encoding process. The Worker uses its binding and needs no R2 S3 credentials. Follow VIDEO_PROCESSING.md for planning, encoding, dry-run validation, upload and registration.
 
-## 3. Build Pages and release
+## 3. Deploy the frontend on Vercel
 
-1. Copy .env.example to .env.local. Fill in VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_PLAYBACK_ORIGIN and VITE_SITE_ORIGIN. These fields are intentionally browser-visible. Keep the service-role key and upload secrets out of all VITE_ variables.
-2. Run npm ci, npm run lint, npm test, npm run test:db and npm run build. The build reads the released catalog using the publishable key for static share metadata and sitemap. Rebuild after public metadata changes. Set the same four build variables in Pages if building there.
-3. Use a Pages project with production branch main, build command npm run build and output directory dist. For direct upload to an existing project run npx wrangler pages deploy dist --project-name YOUR_EXISTING_PROJECT --branch main. Attach the frontend domain and configure SSL/TLS. Review public/_headers for your selected media origins. Confirm that the SPA fallback works on a deep link.
-4. The included GitHub checks run on pushes and PRs. The manual deploy workflow uses an existing production environment. Configure its variables and secrets, protect the branch and environment, and enable the release workflow only when the owner is ready. Deployment does not apply database migrations or create a billing subscription.
-5. Enter rights, register a processed asset and publish the first title. Run node scripts/smoke.mjs https://YOUR_FRONTEND https://YOUR_PLAYBACK. Use a permitted viewer to exercise the protected flow in TESTING.md. Check R2 usage, Worker request totals, database resources and error rates throughout a small pilot.
+1. Start from the directory containing package.json and vercel.json. Import the repository into your Vercel team, or run `npx vercel login` followed by `npx vercel link` and select the intended Netfly project. Use the Vite preset, Node.js 24, install command `npm ci`, build command `npm run build` and output directory `dist`. A Git connection is optional.
+2. For the bundled demo, leave the Supabase and playback variables empty. A preview uses the deployment URL for generated metadata when Vercel exposes system environment variables. Confirm Vercel Authentication is enabled for previews before sharing a restricted screening.
+3. For production, set VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY, VITE_PLAYBACK_ORIGIN and VITE_SITE_ORIGIN in Vercel Project Settings → Environment Variables for the Production environment. Use your stable HTTPS Vercel production hostname or a verified custom domain for VITE_SITE_ORIGIN. Keep the service-role key in Worker secrets and R2 upload credentials on the encoding workstation. Rebuild after changing Vite variables or published catalog metadata.
+4. Set the same stable frontend origin as the Supabase Auth Site URL and Worker APP_ORIGIN. Allow the exact /profile and /account/reset redirects. Use a separate staging gateway, Supabase project and stable staging origin if testing connected previews. Keep rotating preview domains out of the production CORS and Auth allowlists.
+5. Run lint, gateway and database tests, the production build and browser suite locally. With Git connected, branches get previews and the designated production branch gets releases. For a manual preview run `npx vercel deploy` from the linked project, then use `npx vercel deploy --prod` when ready for the intended production audience and plan. Review access controls before launch.
+6. Smoke-test a deep film link, a direct /watch route, the manifest, an HLS segment, security headers and auth redirects. Run `node scripts/smoke.mjs https://YOUR_FRONTEND https://YOUR_PLAYBACK` against the approved production endpoints. The GitHub deploy workflow updates the Cloudflare Worker independently.
 
 ## Local integration services
 

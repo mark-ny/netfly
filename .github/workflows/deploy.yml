@@ -1,12 +1,6 @@
-name: Deploy configured production services
+name: Deploy Cloudflare playback Worker
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: Existing service to update
-        type: choice
-        options: [pages, worker]
-        required: true
 permissions:
   contents: read
 jobs:
@@ -18,10 +12,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
-      VITE_PLAYBACK_ORIGIN: ${{ vars.VITE_PLAYBACK_ORIGIN }}
       VITE_SITE_ORIGIN: ${{ vars.VITE_SITE_ORIGIN }}
-      PAGES_PROJECT: ${{ vars.PAGES_PROJECT }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,13 +21,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test && npm run test:db && npm run lint
-      - if: inputs.target == 'pages'
-        run: |
-          test -n "$VITE_SUPABASE_URL" && test -n "$VITE_SUPABASE_PUBLISHABLE_KEY" && test -n "$VITE_PLAYBACK_ORIGIN" && test -n "$VITE_SITE_ORIGIN" && test -n "$PAGES_PROJECT"
-          npm run build
-          npx --yes wrangler@4.76.0 pages deploy dist --project-name "$PAGES_PROJECT" --branch main
-      - if: inputs.target == 'worker'
-        run: |
+      - run: |
           test -n "$VITE_SITE_ORIGIN" && test -n "$VITE_SUPABASE_URL"
           npx --yes wrangler@4.76.0 deploy --config worker/wrangler.toml --keep-vars --var "APP_ORIGIN:$VITE_SITE_ORIGIN" --var "SUPABASE_URL:$VITE_SUPABASE_URL"
 

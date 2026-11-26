@@ -9,7 +9,7 @@ Sign in with the provisioned staff account. In Profile, enroll a TOTP authentica
 3. Run the local encoder and verify the upload as described in VIDEO_PROCESSING.md. Use its progress and failure status to resume. Register the UUID, actual byte count and qualities under Media assets. Add subtitle labels and relative paths in Subtitles.
 4. Record contract reference, start and end instants and permitted ISO country codes in Licenses. An end instant is exclusive. Keep restrictions aligned with actual distribution rights.
 5. Set state to published and the release time in UTC. Verify a newly authenticated viewer can play from a permitted territory and an ineligible request is denied. To withdraw a title, archive it. Archiving also stops an active stream at its next gateway read.
-6. Verify poster, captions, manual quality, playback errors, search and metadata on the deployed app. Rebuild Pages after metadata changes to refresh crawler previews and sitemap.
+6. Verify poster, captions, manual quality, playback errors, search and metadata on the deployed app. Rebuild the Vercel frontend after metadata changes to refresh crawler previews and sitemap.
 
 ## Daily work
 

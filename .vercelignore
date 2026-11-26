@@ -1,0 +1,13 @@
+.git
+.openai
+.github
+.env*
+.dev.vars
+worker
+supabase
+tools
+tests
+node_modules
+dist
+test-results
+playwright-report

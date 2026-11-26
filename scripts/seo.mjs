@@ -4,7 +4,7 @@ const config = {
   ...loadEnv("production", process.cwd(), "VITE_"),
   ...process.env,
 };
-const origin = config.VITE_SITE_ORIGIN;
+const origin = config.VITE_SITE_ORIGIN || (process.env.VERCEL_URL ? "https://" + process.env.VERCEL_URL : undefined);
 const site = origin ? new URL(origin).origin : null;
 const template = await readFile("dist/index.html", "utf8");
 const escape = (value) =>
