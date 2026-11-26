@@ -70,3 +70,27 @@ My recommendation remains A for launch, with B or C reconsidered after the catal
 - Neon Auth flow: https://neon.com/docs/auth/authentication-flow
 - Free plan limits: https://neon.com/faqs/free-plan-limits-and-quotas, pricing: https://neon.com/pricing
 - Workers with Neon: https://neon.com/docs/guides/cloudflare-workers.md
+
+## 7. Update (you confirmed: Supabase was never connected, Neon is empty and linked to Vercel)
+
+This removes section 3 items 1 (account migration) and the data-migration phase: it is now a **greenfield build on Neon**, not a migration. Findings from Neon's documentation (checked 2026-11-26) that settle earlier VERIFY items:
+
+| Question | Answer |
+|---|---|
+| Email sign-up, verification, password reset | Supported by Neon Auth (Managed Better Auth). Verification codes work on Neon's shared email sender; verification **links** need your own SMTP. |
+| Google sign-in | Supported (needs your Google credentials). |
+| **Two-factor (TOTP) for staff** | **Not available on Managed Auth** (listed as roadmap). The current admin policies depend on it. |
+| Change email or password inside Account settings | `updateUser()` cannot change them on Managed Auth; only the reset flow works. |
+| Data API roles | `authenticated` and `anonymous` (Supabase called it `anon`). Grants must be written for those names. |
+| User id type in RLS | `auth.user_id()` returns text, `auth.uid()` returns uuid (null if `sub` is not a uuid). Pick the one matching the auth table's id type. |
+| Client libraries | Neon's JS client for Managed Auth, or a PostgREST client when you bring another JWT provider. Package names have changed between releases; confirm in the Neon console before installing. |
+| Token lifetime | Data API tokens expire after about 15 minutes; the client must refresh. |
+| Status | Neon Auth is still described as heading to general availability. |
+
+### Decision needed: how do staff get two-factor protection?
+
+1. **Neon Auth now, no staff MFA at launch.** Fastest. Admin access then rests on password strength alone. Mitigate with a very short admin allow-list, long unique passwords, and revisit when Neon ships MFA. Weaker than the brief asks for.
+2. **Neon database with a different JWT provider that has MFA** (for example Clerk or Auth0, via the Data API's JWKS support). Strong admin protection; adds a provider, possible cost and more code.
+3. **Self-managed Better Auth with the two-factor plugin.** Needs a small server component to host the auth endpoints, which is a new backend piece.
+
+Cloudflare Worker and R2 status also matters: the playback gateway and private video storage are separate from the database. If they are not set up yet, they still need to be created from the repo's `worker/` and `DEPLOYMENT.md`.
