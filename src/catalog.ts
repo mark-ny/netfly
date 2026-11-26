@@ -23,96 +23,9 @@ export type Movie = {
 export const demoMode =
   !import.meta.env.VITE_SUPABASE_URL &&
   !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const titles = [
-  [
-    "The Last Light",
-    "the-last-light",
-    "As the sun slips behind the acacias, a quiet road through Kenya takes on a life of its own.",
-    "African Cinema",
-    "Nature",
-    "Kenya",
-  ],
-  [
-    "Blue Hours",
-    "blue-hours",
-    "A study of the open ocean, where light traces the restless surface of the water.",
-    "Nature",
-    "Documentary",
-    "",
-  ],
-  [
-    "Above the Clouds",
-    "above-the-clouds",
-    "Beyond the cloud line, mountain ridges emerge in a changing field of light.",
-    "Adventure",
-    "Nature",
-    "",
-  ],
-  [
-    "Between the Trees",
-    "between-the-trees",
-    "An unhurried passage into the forest, following the light through layers of green.",
-    "Nature",
-    "Documentary",
-    "",
-  ],
-  [
-    "After Dark",
-    "after-dark",
-    "The city comes into focus after sunset, its streets redrawn in pools of electric light.",
-    "Urban",
-    "Documentary",
-    "",
-  ],
-  [
-    "Dunes of Silence",
-    "dunes-of-silence",
-    "Wind and shadow carve a shifting geometry across the desert.",
-    "Adventure",
-    "Nature",
-    "",
-  ],
-  [
-    "Falling Water",
-    "falling-water",
-    "A waterfall fills the frame in a close encounter with the force of moving water.",
-    "Nature",
-    "Documentary",
-    "",
-  ],
-  [
-    "Northern Skies",
-    "northern-skies",
-    "A luminous night sky stretches across a landscape on the edge of darkness.",
-    "Nature",
-    "Adventure",
-    "",
-  ],
-];
-export const demos: Movie[] = titles.map(
-  ([title, slug, synopsis, g, g2, country], i) => ({
-    id: "00000000-0000-4000-8000-" + String(i + 1).padStart(12, "0"),
-    title,
-    slug,
-    synopsis,
-    year: 2026,
-    duration: 18,
-    language: "No dialogue",
-    country,
-    classification: "Unrated",
-    director: "Netfly Studio",
-    poster: "/art/" + slug + "-poster.webp",
-    backdrop: "/art/" + slug + ".webp",
-    trailer: "/demo/" + slug + "/preview.mp4",
-    genres: [g, g2],
-    cast_names: [],
-    created_at: new Date(Date.UTC(2026, 10, 24 - i)).toISOString(),
-    plays: 0,
-    recent_plays: 0,
-    collection_names: ["The screening room"],
-    featured: i < 4,
-  }),
-);
+// The bundled sample films were removed. Without Supabase variables the app
+// starts with an empty catalog; real titles come from the database.
+export const demos: Movie[] = [];
 export function durationLabel(s: number) {
   return s < 60 ? s + " sec" : Math.round(s / 60) + " min";
 }

@@ -38,7 +38,7 @@ if (config.VITE_SUPABASE_URL && config.VITE_SUPABASE_PUBLISHABLE_KEY) {
     if (batch.length < 100) break;
   }
 } else if (!config.VITE_SUPABASE_URL && !config.VITE_SUPABASE_PUBLISHABLE_KEY) {
-  movies = JSON.parse(await readFile("scripts/demo-metadata.json", "utf8"));
+  movies = [];
 } else throw Error("Both Supabase frontend variables are required.");
 for (const m of movies) {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(m.slug))

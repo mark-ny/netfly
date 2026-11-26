@@ -2,12 +2,14 @@ import { lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useParams } from "react-router-dom";
 import { Store, useApp } from "./state";
+import { demoMode } from "./catalog";
 import { Shell } from "./Shell";
 import {
   Details,
   Empty,
   Genres,
   Home,
+  Landing,
   Listing,
   LoadState,
 } from "./CatalogPages";
@@ -22,6 +24,12 @@ function NotFound() {
       text="This page may have moved or the film may be unavailable."
     />
   );
+}
+function Entry() {
+  const { session, authReady } = useApp();
+  if (!demoMode && !authReady)
+    return <div className="loading" role="status" aria-label="Loading" />;
+  return !demoMode && !session ? <Landing /> : <Home />;
 }
 function FilmRoute({ play = false }: { play?: boolean }) {
   const { slug } = useParams(),
@@ -41,7 +49,7 @@ createRoot(document.getElementById("root")!).render(
       >
         <Routes>
           <Route element={<Shell />}>
-            <Route index element={<Home />} />
+            <Route index element={<Entry />} />
             {[
               "movies",
               "search",

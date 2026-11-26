@@ -165,7 +165,7 @@ grant usage on schema auth to anon,authenticated,service_role;`);
     ),
     restUrl = "http://127.0.0.1:" + portOf(rest, 3000);
   await until(async () => (await fetch(restUrl + "/catalog")).ok);
-  const bytes = await readFile("public/demo/the-last-light/master.m3u8"),
+  const bytes = await readFile("tests/fixtures/hls/the-last-light/master.m3u8"),
     film = "00000000-0000-4000-8000-000000000001";
   const env = {
     APP_ORIGIN: app,
@@ -178,7 +178,7 @@ grant usage on schema auth to anon,authenticated,service_role;`);
         if (!k.startsWith(film + "/")) return null;
         try {
           const body = await readFile(
-            "public/demo/the-last-light/" + k.slice(37),
+            "tests/fixtures/hls/the-last-light/" + k.slice(37),
           );
           return { body, size: body.length };
         } catch {
@@ -405,7 +405,7 @@ grant usage on schema auth to anon,authenticated,service_role;`);
   console.log("PASS authenticated HLS playback through Worker and database");
   await page.goto(app + "/movie/the-last-light");
   await page.locator(".detail .ghost").first().click();
-  await page.getByText("Added to your watchlist").waitFor();
+  await page.getByText("Added to My List").waitFor();
   await page.goto(app + "/watchlist");
   await page
     .locator(".cardtitle")

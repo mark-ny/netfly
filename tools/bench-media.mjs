@@ -1,5 +1,5 @@
 // Run only against a temporary, loopback-bound server created by this process.
-// Usage: node tools/bench-media.mjs [public/demo]
+// Usage: node tools/bench-media.mjs [tests/fixtures/hls]
 import http from 'node:http';
 import { createReadStream } from 'node:fs';
 import { readdir, stat, realpath } from 'node:fs/promises';
@@ -7,7 +7,7 @@ import { resolve, join, relative, sep } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const root = await realpath(process.argv[2] || 'public/demo');
+const root = await realpath(process.argv[2] || 'tests/fixtures/hls');
 const studies = (await readdir(root, { withFileTypes: true })).filter(entry =>
   entry.isDirectory() && /^[a-z]+(?:-[a-z]+)*$/.test(entry.name));
 const assets = new Map();

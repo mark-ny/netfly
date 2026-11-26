@@ -28,7 +28,7 @@ npx playwright install chromium
 npm run e2e
 npm run test:connected
 npm audit
-node tools/bench-media.mjs public/demo
+node tools/bench-media.mjs tests/fixtures/hls
 ```
 
 Set CHROMIUM_PATH to an installed Chromium executable when using a system browser. The connected suite requires Docker, sufficient free disk space for its four images and free loopback ports 4213 and 4214. It creates isolated test accounts and private Docker services, then removes its own containers. The demo suite tests a production build with both Supabase build variables empty. Its browser fixture uses port 4186.

@@ -302,7 +302,7 @@ export function Profile() {
           : session?.user.email}
       </p>
       <div className="subnav">
-        <Link to="/watchlist">Watchlist</Link>
+        <Link to="/watchlist">My List</Link>
         <Link to="/history">Watch history</Link>
         <Link to="/account/settings">Settings</Link>
         {role !== "viewer" && <Link to="/admin">Administration</Link>}
@@ -361,16 +361,28 @@ export function Profile() {
         )}
       </section>
       {!demoMode && (
-        <button
-          className="ghost"
-          onClick={async () => {
-            const r = await db!.auth.signOut();
-            if (r.error) setNotice(r.error.message);
-            else nav("/");
-          }}
-        >
-          Sign out
-        </button>
+        <div className="actions">
+          <button
+            className="ghost"
+            onClick={async () => {
+              const r = await db!.auth.signOut();
+              if (r.error) setNotice(r.error.message);
+              else nav("/");
+            }}
+          >
+            Sign out
+          </button>
+          <button
+            className="ghost"
+            onClick={async () => {
+              const r = await db!.auth.signOut({ scope: "global" });
+              if (r.error) setNotice(r.error.message);
+              else nav("/");
+            }}
+          >
+            Sign out on all devices
+          </button>
+        </div>
       )}
     </div>
   );
@@ -557,11 +569,6 @@ export function Legal({ kind }: { kind: string }) {
           <p>{p}</p>
         </section>
       ))}
-      {kind === "copyright" && (
-        <p>
-          <a href="/art/CREDITS.md">Photography credits</a>
-        </p>
-      )}
       <p>
         <Link
           to={

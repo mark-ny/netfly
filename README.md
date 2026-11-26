@@ -1,6 +1,6 @@
 # Netfly
 
-A free-viewing movie library with a React frontend hosted on Vercel, Supabase Auth and PostgreSQL, private R2 media delivery through a Cloudflare Worker, and a local FFmpeg pipeline. The included catalog contains eight original 18-second picture studies with two HLS qualities, English captions and short previews. Licensed feature films can be registered through administration.
+A free-viewing movie library with a React frontend hosted on Vercel, Supabase Auth and PostgreSQL, private R2 media delivery through a Cloudflare Worker, and a local FFmpeg pipeline. The sample films that shipped with earlier versions were removed; add licensed titles through Administration.
 
 ## Start locally
 
@@ -9,10 +9,11 @@ npm ci
 npm run dev
 ```
 
-Use Node 22.12+ or 24 and open the URL printed by Vite. The demo works without accounts or cloud credentials. Save a film, play it, switch quality and captions, revisit your history and edit the local profile. The rights and credits for the demo photography are in public/art/CREDITS.md.
+Use Node 22.12+ or 24 and open the URL printed by Vite.  Without cloud credentials the app starts with an empty catalog, a browser-local profile and the navigation, so you can check the layout. Connect Supabase to see real titles.
 
 ## Feature checklist
 
+- Signed-out landing page (connected mode), New & Popular and My List navigation, Resume and More info on the hero, Popular and genre rows, More like this, and sign-out on all devices. See NETFLY_UPGRADE_REPORT.md for verification status.
 - Home feature carousel, genre shelves, collections, search, filtering, pagination, trending and recently added pages, shared film links and per-film metadata.
 - Adaptive HLS, manual quality, subtitles, keyboard controls, playback speed, fullscreen, browser-supported picture-in-picture, ten-second skip, resume and stream reporting.
 - Email confirmation, login, recovery, optional Google, TOTP, profile settings, ratings, watchlists, history clearing, export and account deletion in connected mode.

@@ -13,7 +13,7 @@ The client is a React and TypeScript single-page app built with Vite, Tailwind, 
 
 ## Local demo
 
-Eight open-access picture studies run from public/demo. Their explicitly public media is distributable under the terms described in public/art/CREDITS.md. The app stores its local profile in browser localStorage. Configuring both Supabase variables switches the catalog and viewer data to the database. An unreachable configured backend surfaces an error.
+The bundled sample films were removed. Without Supabase variables the preview starts with an empty catalog; the app stores its local profile in browser localStorage. The app stores its local profile in browser localStorage. Configuring both Supabase variables switches the catalog and viewer data to the database. An unreachable configured backend surfaces an error.
 
 ## Future paid access
 

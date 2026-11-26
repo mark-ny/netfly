@@ -73,7 +73,7 @@ export function Shell() {
     });
     meta('meta[property="og:image"]', "meta", {
       property: "og:image",
-      content: new URL(m?.backdrop || "/art/the-last-light.webp", href).href,
+      content: new URL(m?.backdrop || "/icon-512.png", href).href,
     });
     meta('meta[name="robots"]', "meta", {
       name: "robots",
@@ -136,6 +136,7 @@ export function Shell() {
               Home
             </NavLink>
             <NavLink to="/movies">Movies</NavLink>
+            <NavLink to="/trending">New &amp; Popular</NavLink>
             <div className="genre-wrap">
               <button
                 className={genres ? "active" : ""}
@@ -167,7 +168,7 @@ export function Shell() {
             </div>
             <NavLink to="/watchlist">
               <Bookmark size={15} />
-              Watchlist
+              My List
             </NavLink>
           </nav>
           <div className="navtools">
@@ -181,6 +182,11 @@ export function Shell() {
               <kbd>/</kbd>
             </Link>
             <span className="divider" />
+            {!demoMode && !session && (
+              <Link className="signin-link" to="/login">
+                Sign in
+              </Link>
+            )}
             <Link
               aria-label="Open profile"
               className="profilelink"

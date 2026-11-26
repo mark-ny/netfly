@@ -23,6 +23,7 @@ function useStore() {
     [busy, setBusy] = useState(true),
     [problem, setProblem] = useState(""),
     [session, setSession] = useState<Session | null>(null),
+    [authReady, setAuthReady] = useState(!db),
     [role, setRole] = useState("viewer"),
     [loadedUser, setLoadedUser] = useState<string>(),
     [brand, setBrand] = useState("Netfly"),
@@ -60,6 +61,7 @@ function useStore() {
     if (!db) return;
     const { data } = db.auth.onAuthStateChange((event, s) => {
       setSession(s);
+      setAuthReady(true);
       if (event === "PASSWORD_RECOVERY") nav("/account/reset");
     });
     return () => data.subscription.unsubscribe();
@@ -147,7 +149,7 @@ function useStore() {
               .delete()
               .match({ user_id: account, movie_id: id })
           : db!.from("watchlists").upsert({ user_id: account, movie_id: id }),
-      remove ? "Removed from your watchlist" : "Added to your watchlist",
+      remove ? "Removed from My List" : "Added to My List",
     );
   }
   function progress(id: string, position: number) {
@@ -192,6 +194,7 @@ function useStore() {
   }
   return {
     personalReady: demoMode || !account || loadedUser === account,
+    authReady,
     movies,
     busy,
     problem,

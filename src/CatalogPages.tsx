@@ -123,6 +123,18 @@ function Shelf({
         </div>
         {movies.length > 5 && (
           <button
+            className="rowprev"
+            aria-label={"Scroll back " + title}
+            onClick={() => {
+              const el = ref.current!;
+              el.scrollBy({ left: -el.clientWidth * 0.8, behavior: "smooth" });
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
+        {movies.length > 5 && (
+          <button
             className="rownext"
             aria-label={"Scroll " + title}
             onClick={() => {
@@ -145,6 +157,9 @@ function Hero({ films }: { films: Movie[] }) {
     m = films[index % films.length],
     { personal, save } = useApp(),
     saved = personal.saved.includes(m.id),
+    resume =
+      personal.progress[m.id]?.position > 0 &&
+      personal.progress[m.id].position < m.duration - 1,
     reduce = useReducedMotion();
   const move = (n: number) =>
     setIndex((index + n + films.length) % films.length);
@@ -180,11 +195,15 @@ function Hero({ films }: { films: Movie[] }) {
           <div className="actions">
             <Link to={"/watch/" + m.slug} className="primary">
               <Play size={16} fill="currentColor" />
-              Watch now
+              {resume ? "Resume" : "Watch now"}
+            </Link>
+            <Link to={"/movie/" + m.slug} className="ghost">
+              <Info size={17} />
+              More info
             </Link>
             <button className="ghost" onClick={() => save(m.id)}>
               {saved ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}{" "}
-              {saved ? "Saved" : "Watchlist"}
+              {saved ? "In My List" : "My List"}
             </button>
           </div>
         </div>
@@ -240,6 +259,14 @@ export function Home() {
         personal.progress[m.id]?.position > 0 &&
         personal.progress[m.id].position < m.duration - 1,
     );
+  const genreRows = g
+    .map((n) => [n, movies.filter((m) => m.genres.includes(n))] as const)
+    .filter(([, list]) => list.length >= 2)
+    .sort(
+      ([a], [b]) =>
+        Number(b === "African Cinema") - Number(a === "African Cinema"),
+    )
+    .slice(0, 3);
   const liked = new Set(
       movies
         .filter(
@@ -308,10 +335,25 @@ export function Home() {
               to="/trending"
             />
             <Shelf
+              title="Popular on Netfly"
+              movies={movies
+                .filter((m) => m.plays > 0)
+                .sort((a, b) => b.plays - a.plays)}
+              to="/popular"
+            />
+            <Shelf
               title="Recently added"
               movies={movies.slice(0, 6)}
               to="/recently-added"
             />
+            {genreRows.map(([n, list]) => (
+              <Shelf
+                key={"genre-" + n}
+                title={n}
+                movies={list}
+                to={"/movies?genre=" + encodeURIComponent(n)}
+              />
+            ))}
             {[...new Set(movies.flatMap((m) => m.collection_names))]
               .filter((n) => n !== "The screening room")
               .map((n) => (
@@ -351,7 +393,7 @@ export function Listing() {
     names: Record<string, string> = {
       movies: "All movies",
       search: "Search films",
-      watchlist: "Your watchlist",
+      watchlist: "My List",
       history: "Watch history",
       trending: "Trending now",
       popular: "Popular films",
@@ -489,7 +531,7 @@ export function Listing() {
                 q || genre
                   ? "No matching films"
                   : section === "watchlist"
-                    ? "Your watchlist is empty"
+                    ? "Your list is empty"
                     : section === "history"
                       ? "No watch history yet"
                       : "No films here yet"
@@ -557,7 +599,7 @@ export function Genres() {
   );
 }
 export function Details({ m }: { m: Movie }) {
-  const { save, personal, rate, setNotice } = useApp(),
+  const { save, personal, rate, setNotice, movies } = useApp(),
     [preview, setPreview] = useState(false);
   useEffect(() => setPreview(false), [m.id]);
   return (
@@ -593,7 +635,7 @@ export function Details({ m }: { m: Movie }) {
           </Link>
           <button className="ghost" onClick={() => save(m.id)}>
             <Bookmark size={16} />
-            {personal.saved.includes(m.id) ? "Saved" : "Watchlist"}
+            {personal.saved.includes(m.id) ? "In My List" : "My List"}
           </button>
           {m.trailer && (
             <button className="ghost" onClick={() => setPreview(!preview)}>
@@ -659,7 +701,97 @@ export function Details({ m }: { m: Movie }) {
         <Link className="back" to={"/support?movie=" + m.id}>
           <Info size={14} /> Report a playback issue
         </Link>
+        <Shelf
+          title="More like this"
+          movies={movies
+            .filter(
+              (x) =>
+                x.id !== m.id && x.genres.some((g) => m.genres.includes(g)),
+            )
+            .sort(
+              (a, b) =>
+                b.genres.filter((g) => m.genres.includes(g)).length -
+                a.genres.filter((g) => m.genres.includes(g)).length,
+            )
+            .slice(0, 8)}
+          to={"/movies?genre=" + encodeURIComponent(m.genres[0] || "")}
+        />
       </div>
     </div>
+  );
+}
+
+export function Landing() {
+  const { movies } = useApp(),
+    pool = movies.filter((m) => m.featured),
+    picks = (pool.length ? pool : movies).slice(0, 6),
+    lead = picks[0];
+  const faqs = [
+    [
+      "What is Netfly?",
+      "Netfly is a free streaming library of licensed and public-domain films. Create an account to watch, build My List and resume where you stopped.",
+    ],
+    [
+      "Does it cost anything?",
+      "Watching is free. This version has no payment features.",
+    ],
+    [
+      "Where can I watch?",
+      "In a current web browser on a phone, tablet or computer. Some smart TV browsers may work, but there are no TV apps.",
+    ],
+    [
+      "Why do I need an account?",
+      "Your account keeps your list, progress and ratings, and lets Netfly confirm a film is licensed for your region before it plays.",
+    ],
+    [
+      "A film will not play. What now?",
+      "A title can be outside its licensed dates or region. Use Report a playback issue on the film page and we will look into it.",
+    ],
+  ];
+  return (
+    <>
+      <section className="landing" aria-labelledby="landing-title">
+        {lead && (
+          <div
+            className="landing-photo"
+            style={{ backgroundImage: "url(" + JSON.stringify(lead.backdrop) + ")" }}
+          />
+        )}
+        <div className="hero-shade" />
+        <div className="landing-copy">
+          <h1 id="landing-title">Entertainment Without Limits</h1>
+          <p>Stream licensed and public-domain films, free. Save titles, pick up where you left off and watch on any modern browser.</p>
+          <div className="actions">
+            <Link className="primary" to="/signup">
+              Join free
+              <ArrowRight size={16} />
+            </Link>
+            <Link className="ghost" to="/login">
+              Sign in
+            </Link>
+            <Link className="ghost" to="/movies">
+              Browse films
+            </Link>
+          </div>
+        </div>
+      </section>
+      <div className="homebody">
+        <Shelf title="On Netfly now" movies={picks} to="/movies" icon />
+        <section className="faq" aria-labelledby="faq-title">
+          <h2 id="faq-title">Frequently asked questions</h2>
+          {faqs.map(([q, a]) => (
+            <details key={q}>
+              <summary>{q}</summary>
+              <p>{a}</p>
+            </details>
+          ))}
+          <p className="small">
+            Need help? <Link to="/support">Contact support</Link> ·{" "}
+            <Link to="/privacy">Privacy</Link> · <Link to="/terms">Terms</Link>{" "}
+            · <Link to="/copyright">Copyright</Link>
+          </p>
+        </section>
+      </div>
+    </>
   );
 }

@@ -9,7 +9,7 @@ npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. With both Supabase variables empty, the eight bundled films and a browser-local profile are available. To build static files, run npm run build and npm run preview. Set VITE_SITE_ORIGIN to the full frontend origin when building a release to generate its sitemap and absolute sharing URLs.
+Open the local URL printed by Vite. With both Supabase variables empty, an empty catalog and a browser-local profile are available. To build static files, run npm run build and npm run preview. Set VITE_SITE_ORIGIN to the full frontend origin when building a release to generate its sitemap and absolute sharing URLs.
 
 ## Accounts for launching Netfly
 
