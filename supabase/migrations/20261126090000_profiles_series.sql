@@ -1,0 +1,153 @@
+-- Netfly 1.6.0: viewer profiles ("Who's watching?") and TV series.
+-- NOT APPLIED to any database and NOT run against Postgres by the author.
+-- Apply to a staging project first. Deploy the 1.6.0 client together with this
+-- migration: the primary keys of the per-viewer tables change.
+-- Series episodes are ordinary movies rows, so ingestion, upload and playback are unchanged.
+begin;
+
+-- ---------- Viewer profiles ----------
+create table public.viewer_profiles(
+  id uuid primary key default gen_random_uuid(),
+  account_id uuid not null references auth.users on delete cascade,
+  name text not null check(length(btrim(name)) between 1 and 30),
+  avatar text not null default 'ember' check(avatar in ('ember','sky','leaf','plum','sand','rose')),
+  is_default boolean not null default false,
+  created_at timestamptz not null default now()
+);
+create unique index viewer_one_default on public.viewer_profiles(account_id) where is_default;
+create index viewer_account on public.viewer_profiles(account_id);
+
+-- At most five profiles per account. The advisory lock stops two inserts racing past the cap.
+create function private.profile_cap() returns trigger language plpgsql security definer set search_path='' as $$
+begin
+  perform pg_advisory_xact_lock(hashtext('viewer-'||new.account_id::text));
+  if (select count(*) from public.viewer_profiles where account_id=new.account_id)>=5 then
+    raise exception 'You can have up to 5 profiles.';
+  end if;
+  return new;
+end $$;
+create trigger profile_cap before insert on public.viewer_profiles for each row execute function private.profile_cap();
+
+alter table public.viewer_profiles enable row level security;
+revoke all on public.viewer_profiles from anon, authenticated;
+grant all on public.viewer_profiles to service_role;
+grant select,delete on public.viewer_profiles to authenticated;
+grant insert(account_id,name,avatar) on public.viewer_profiles to authenticated;
+grant update(name,avatar) on public.viewer_profiles to authenticated;
+create policy own_read on public.viewer_profiles for select to authenticated using(account_id=(select auth.uid()));
+-- Column grants stop browsers from setting or changing is_default (server-only).
+create policy own_insert on public.viewer_profiles for insert to authenticated with check(account_id=(select auth.uid()) and not is_default);
+create policy own_update on public.viewer_profiles for update to authenticated using(account_id=(select auth.uid())) with check(account_id=(select auth.uid()));
+create policy own_delete on public.viewer_profiles for delete to authenticated using(account_id=(select auth.uid()) and not is_default);
+
+-- New accounts get a default profile; existing accounts are backfilled below.
+create or replace function private.on_signup() returns trigger language plpgsql security definer set search_path='' as $$
+begin
+  insert into public.profiles(user_id) values(new.id);
+  insert into public.roles(user_id) values(new.id);
+  insert into public.viewer_profiles(account_id,name,is_default) values(new.id,'Me',true);
+  return new;
+end $$;
+insert into public.viewer_profiles(account_id,name,is_default)
+select p.user_id, coalesce(nullif(btrim(p.display_name),''),'Me'), true from public.profiles p
+on conflict do nothing;
+
+-- ---------- Per-profile watch data ----------
+alter table public.watchlists     add column profile_id uuid references public.viewer_profiles on delete cascade;
+alter table public.watch_progress add column profile_id uuid references public.viewer_profiles on delete cascade;
+alter table public.ratings        add column profile_id uuid references public.viewer_profiles on delete cascade;
+update public.watchlists w     set profile_id=(select v.id from public.viewer_profiles v where v.account_id=w.user_id and v.is_default);
+update public.watch_progress w set profile_id=(select v.id from public.viewer_profiles v where v.account_id=w.user_id and v.is_default);
+update public.ratings w        set profile_id=(select v.id from public.viewer_profiles v where v.account_id=w.user_id and v.is_default);
+
+-- Rows must point at a profile of the same account. A missing profile_id (an older client)
+-- falls back to the account's default profile instead of failing.
+create function private.profile_guard() returns trigger language plpgsql security definer set search_path='' as $$
+begin
+  if new.profile_id is null then
+    select v.id into new.profile_id from public.viewer_profiles v where v.account_id=new.user_id and v.is_default;
+  end if;
+  if not exists(select 1 from public.viewer_profiles v where v.id=new.profile_id and v.account_id=new.user_id) then
+    raise exception 'That profile does not belong to this account.';
+  end if;
+  return new;
+end $$;
+create trigger profile_guard before insert or update on public.watchlists     for each row execute function private.profile_guard();
+create trigger profile_guard before insert or update on public.watch_progress for each row execute function private.profile_guard();
+create trigger profile_guard before insert or update on public.ratings        for each row execute function private.profile_guard();
+revoke all on function private.profile_cap(), private.profile_guard() from public;
+
+alter table public.watchlists     alter column profile_id set not null;
+alter table public.watch_progress alter column profile_id set not null;
+alter table public.ratings        alter column profile_id set not null;
+alter table public.watchlists     drop constraint watchlists_pkey,     add primary key(profile_id,movie_id);
+alter table public.watch_progress drop constraint watch_progress_pkey, add primary key(profile_id,movie_id);
+alter table public.ratings        drop constraint ratings_pkey,        add primary key(profile_id,movie_id);
+create index watchlists_user on public.watchlists(user_id);
+create index watch_progress_user on public.watch_progress(user_id);
+create index ratings_user on public.ratings(user_id);
+
+-- ---------- TV series ----------
+create table public.series(
+  id uuid primary key default gen_random_uuid(),
+  title text not null check(length(title) between 1 and 180),
+  slug text unique not null check(slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  synopsis text not null default '' check(length(synopsis)<=6000),
+  year int not null check(year between 1880 and 2200),
+  language text not null default 'No dialogue',
+  country text not null default '',
+  classification text not null default 'Unrated',
+  poster text not null check(poster ~ '^(https://|/art/)'),
+  backdrop text not null check(backdrop ~ '^(https://|/art/)'),
+  featured boolean not null default false,
+  state text not null default 'draft' check(state in ('draft','published','archived')),
+  release_at timestamptz not null default now(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create trigger stamp before update on public.series for each row execute function private.stamp();
+create trigger audit_change after insert or update or delete on public.series for each row execute function private.audit();
+
+-- An episode is a movies row (it keeps its own HLS assets, licence and playback path).
+create table public.episodes(
+  movie_id uuid primary key references public.movies on delete cascade,
+  series_id uuid not null references public.series on delete cascade,
+  season int not null default 1 check(season between 1 and 99),
+  number int not null check(number between 1 and 999),
+  unique(series_id,season,number)
+);
+create index episodes_series on public.episodes(series_id,season,number);
+create trigger audit_change after insert or update or delete on public.episodes for each row execute function private.audit();
+
+alter table public.series enable row level security;
+alter table public.episodes enable row level security;
+grant select on public.series,public.episodes to anon,authenticated;
+grant insert,update,delete on public.series,public.episodes to authenticated;
+create policy released on public.series for select using(state='published' and release_at<=now());
+create policy staff_write on public.series for all to authenticated using((select private.level())>=1) with check((select private.level())>=1);
+-- Episode links are visible only when both the series and the episode film are released.
+create policy released_links on public.episodes for select using(
+  exists(select 1 from public.series s where s.id=series_id and s.state='published' and s.release_at<=now())
+  and exists(select 1 from public.movies m where m.id=movie_id and m.state='published' and m.release_at<=now()));
+create policy staff_write on public.episodes for all to authenticated using((select private.level())>=1) with check((select private.level())>=1);
+
+-- The film catalog hides episodes; the app lists them through public.series_catalog.
+create or replace view public.catalog with(security_invoker=true) as select m.id,m.title,m.slug,m.synopsis,m.year,m.duration,m.language,m.country,m.classification,m.director,m.poster,m.backdrop,m.trailer,m.featured,m.created_at,
+array(select g.name from public.genres g join public.movie_genres mg on mg.genre_id=g.id where mg.movie_id=m.id order by g.name) genres,
+array(select c.name from public.cast_members c join public.movie_cast mc on mc.cast_id=c.id where mc.movie_id=m.id) cast_names,
+array(select c.name from public.collections c join public.collection_movies cm on cm.collection_id=c.id where cm.movie_id=m.id order by c.sort_order) collection_names,
+coalesce((select sum(a.plays) from public.analytics_daily a where a.movie_id=m.id),0)::int plays,
+coalesce((select sum(a.plays) from public.analytics_daily a where a.movie_id=m.id and a.day>=current_date-6),0)::int recent_plays,
+(select e.series_id from public.episodes e where e.movie_id=m.id) series_id,
+(select e.season from public.episodes e where e.movie_id=m.id) season,
+(select e.number from public.episodes e where e.movie_id=m.id) episode_number
+from public.movies m where state='published' and release_at<=now();
+grant select on public.catalog to anon,authenticated,service_role;
+
+commit;
+
+-- Rollback (manual, destructive for profile-scoped data):
+--   begin;
+--   alter table public.watchlists drop constraint watchlists_pkey, add primary key(user_id,movie_id);   -- fails if two profiles saved the same film; delete the extras first
+--   (repeat for watch_progress and ratings), then drop the profile_id columns, the guard triggers,
+--   public.episodes, public.series, public.viewer_profiles, restore private.on_signup() and the old catalog view.

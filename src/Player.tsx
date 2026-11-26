@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import { ArrowLeft, RotateCcw, RotateCw } from "lucide-react";
@@ -13,17 +13,41 @@ type Grant = {
   tracks: { label: string; language: string; url: string }[];
 };
 export default function Player({ m }: { m: Movie }) {
-  const { personal, progress, session } = useApp(),
+  const { personal, progress, session, episodes, series } = useApp(),
+    nav = useNavigate(),
     container = useRef<HTMLDivElement>(null),
     player = useRef<ReturnType<typeof videojs> | null>(null),
     [err, setErr] = useState(""),
     [attempt, setAttempt] = useState(0),
     [options, setOptions] = useState<number[]>([]),
     [quality, setQuality] = useState("auto"),
+    [done, setDone] = useState(false),
+    [count, setCount] = useState(8),
     saved = useRef(personal.progress[m.id]?.position || 0),
     write = useRef(progress);
   write.current = progress;
   const id = session?.user.id;
+  const sibs = m.series_id
+      ? episodes
+          .filter((e) => e.series_id === m.series_id)
+          .sort(
+            (a, b) =>
+              (a.season || 0) - (b.season || 0) ||
+              (a.episode_number || 0) - (b.episode_number || 0),
+          )
+      : [],
+    next = sibs[sibs.findIndex((e) => e.id === m.id) + 1],
+    show = series.find((x) => x.id === m.series_id);
+  // After an episode ends, offer the next one and move on after a short countdown.
+  useEffect(() => {
+    if (!done || !next) return;
+    if (count <= 0) {
+      nav("/watch/" + next.slug);
+      return;
+    }
+    const t = setTimeout(() => setCount((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [done, count, next?.id]);
   useEffect(() => {
     if (!demoMode && !id) return;
     let active = true,
@@ -132,6 +156,7 @@ export default function Player({ m }: { m: Movie }) {
       });
       p.on("pause", () => mark(true));
       p.on("ended", () => {
+        setDone(true);
         mark(true);
         void pulse(false, false, true);
       });
@@ -216,11 +241,32 @@ export default function Player({ m }: { m: Movie }) {
     );
   return (
     <div className="watchpage">
-      <Link className="back" to={"/movie/" + m.slug}>
+      <Link
+        className="back"
+        to={show ? "/series/" + show.slug : "/movie/" + m.slug}
+      >
         <ArrowLeft size={15} />
-        Film details
+        {show ? show.title : "Film details"}
       </Link>
-      <h1>{m.title}</h1>
+      <h1>
+        {show && m.season != null && m.episode_number != null
+          ? "S" + m.season + " E" + m.episode_number + " · "
+          : ""}
+        {m.title}
+      </h1>
+      {done && next && (
+        <div className="upnext" role="status">
+          <span>
+            Next: E{next.episode_number} · {next.title}
+          </span>
+          <Link className="primary" to={"/watch/" + next.slug}>
+            Play now
+          </Link>
+          <button className="ghost" onClick={() => setDone(false)}>
+            Cancel ({count})
+          </button>
+        </div>
+      )}
       {err && (
         <div role="alert" className="msg">
           {err}{" "}

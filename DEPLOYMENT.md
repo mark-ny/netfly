@@ -78,3 +78,8 @@ With Docker and the Supabase CLI installed, supabase start launches local Auth, 
 
 The separate npm run test:connected harness creates temporary loopback Docker services, a test mailbox and an isolated PostgreSQL database for end-to-end checks. It generates disposable credentials and removes its own containers.
 
+
+## 1.6.0 migration order
+1. Apply `supabase/migrations/20261126090000_profiles_series.sql` to a staging project and run `npm run test:db`.
+2. Deploy the 1.6.0 client and the Worker together with the migration (the primary keys of the personal tables change).
+3. Check: sign in, pick or add a profile, save a film, switch profile and confirm the list is separate.

@@ -67,3 +67,11 @@ Detailed SQL, rules, tests and rollback are in `docs/proposals/viewer-profiles.m
 ## 11. Neon database (you asked for a migration plan)
 
 See `docs/proposals/neon-migration.md`: options (stay on Supabase, full Neon, Neon with the existing sign-in), risks (accounts, staff MFA, Worker rewrite, free-plan compute limits under playback load) and a staged plan with rollback. Nothing has been changed.
+
+## 12. Kids profiles, PIN lock and maturity limits (not implemented)
+
+Profiles (1.6.0) separate lists and history only. Restricting what a profile can see or play is a security feature, so it should be enforced server side:
+1. Add `max_rank` and `is_kids` to `viewer_profiles`, written only through the Worker.
+2. Filter the `catalog` view by the active profile's rank (needs the profile in the request, for example a Worker-signed claim) and check the rank again in `start_playback`.
+3. Store PIN hashes server side with a rate limit; never compare a PIN in the browser.
+This needs a Worker change and approval, so it is left as a proposal. The earlier draft is in docs/proposals/viewer-profiles.sql (superseded by the migration for everything except these fields).

@@ -247,6 +247,13 @@ export async function handle(req, e) {
         if (page.length < 500) break;
       }
     }
+    // Viewer profiles (1.6.0). Older databases without the table still export everything else.
+    data.viewer_profiles = await rest(
+      e,
+      "/rest/v1/viewer_profiles?account_id=eq." +
+        user.id +
+        "&select=id,name,avatar,is_default,created_at&order=created_at",
+    ).catch(() => []);
     return json(data);
   }
   if (u.pathname === "/account/delete") {

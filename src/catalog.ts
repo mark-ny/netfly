@@ -19,6 +19,9 @@ export type Movie = {
   recent_plays: number;
   collection_names: string[];
   featured: boolean;
+  series_id?: string | null;
+  season?: number | null;
+  episode_number?: number | null;
 };
 export const demoMode =
   !import.meta.env.VITE_SUPABASE_URL &&

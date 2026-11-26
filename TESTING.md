@@ -39,3 +39,7 @@ The connected suite runs the real Worker handler with a local file-backed bucket
 
 Run the smoke script after configuring staging. Sign up through the deployed frontend, receive the verification email, sign in, play a permitted registered film, pause and resume from another browser, change quality and captions, and keep playing past several renewals. Verify an expired contract and a viewer in an excluded territory cannot read the media. Review response headers and check that the service worker contains no protected media. Measure first-frame time, authorization latency, buffering, failures, actual request counts and cost under the staging plan before raising capacity.
 
+
+## 1.6.0 additions (never run)
+- `tests/db.mjs`: 15 new cases for profile creation limits, default-profile protection, cross-account profile rejection, per-profile data, series visibility, episode uniqueness and staff-only writes. They load every file in `supabase/migrations/`, so the new migration is exercised by `npm run test:db`.
+- `tests/browser/demo.spec.ts`: series empty state and picker redirect.

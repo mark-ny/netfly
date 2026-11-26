@@ -51,15 +51,35 @@ export function readDemo(): Personal {
 export function writeDemo(p: Personal) {
   localStorage.setItem(storageKey, JSON.stringify(p));
 }
-export async function loadPersonal(id: string): Promise<Personal> {
+export type Profile = {
+  id: string;
+  name: string;
+  avatar: string;
+  is_default: boolean;
+};
+export const avatars = ["ember", "sky", "leaf", "plum", "sand", "rose"] as const;
+export const maxProfiles = 5;
+export async function loadProfiles(account: string): Promise<Profile[]> {
+  const { data, error } = await db!
+    .from("viewer_profiles")
+    .select("id,name,avatar,is_default")
+    .eq("account_id", account)
+    .order("created_at");
+  if (error) throw error;
+  return data || [];
+}
+export async function loadPersonal(
+  id: string,
+  profile: string,
+): Promise<Personal> {
   const d = db!;
   const [s, p, r, u] = await Promise.all([
-    d.from("watchlists").select("movie_id").eq("user_id", id),
+    d.from("watchlists").select("movie_id").eq("profile_id", profile),
     d
       .from("watch_progress")
       .select("movie_id,position,updated_at")
-      .eq("user_id", id),
-    d.from("ratings").select("movie_id,score").eq("user_id", id),
+      .eq("profile_id", profile),
+    d.from("ratings").select("movie_id,score").eq("profile_id", profile),
     d
       .from("profiles")
       .select("display_name,reduce_data")
@@ -76,6 +96,31 @@ export async function loadPersonal(id: string): Promise<Personal> {
     name: u.data?.display_name || "",
     reduceData: u.data?.reduce_data || false,
   };
+}
+export type Series = {
+  id: string;
+  slug: string;
+  title: string;
+  synopsis: string;
+  year: number;
+  language: string;
+  country: string;
+  classification: string;
+  poster: string;
+  backdrop: string;
+  featured: boolean;
+};
+export async function loadSeries(): Promise<Series[]> {
+  if (demoMode || !db) return [];
+  const { data, error } = await db
+    .from("series")
+    .select(
+      "id,slug,title,synopsis,year,language,country,classification,poster,backdrop,featured",
+    )
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return data || [];
 }
 export async function callWorker(path: string, body?: object) {
   if (!db || !gateway)

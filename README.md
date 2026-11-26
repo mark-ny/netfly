@@ -14,6 +14,7 @@ Use Node 22.12+ or 24 and open the URL printed by Vite.  Without cloud credentia
 ## Feature checklist
 
 - Signed-out landing page (connected mode), New & Popular and My List navigation, Resume and More info on the hero, Popular and genre rows, More like this, and sign-out on all devices. See NETFLY_UPGRADE_REPORT.md for verification status.
+- Viewer profiles (up to 5 per account, per-profile My List, history and ratings) and TV series with seasons, episodes and next-episode playback (1.6.0, needs the new migration).
 - Home feature carousel, genre shelves, collections, search, filtering, pagination, trending and recently added pages, shared film links and per-film metadata.
 - Adaptive HLS, manual quality, subtitles, keyboard controls, playback speed, fullscreen, browser-supported picture-in-picture, ten-second skip, resume and stream reporting.
 - Email confirmation, login, recovery, optional Google, TOTP, profile settings, ratings, watchlists, history clearing, export and account deletion in connected mode.

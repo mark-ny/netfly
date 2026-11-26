@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useApp } from "./state";
 import { demoMode } from "./catalog";
+import { Avatar } from "./Profiles";
 export function Mark() {
   return (
     <svg aria-hidden="true" viewBox="0 0 38 38" fill="none">
@@ -29,18 +30,18 @@ export function Mark() {
   );
 }
 export function Shell() {
-  const { brand, notice, session } = useApp(),
+  const { brand, notice, session, series, profile } = useApp(),
     [menu, setMenu] = useState(false),
     [genres, setGenres] = useState(false),
     loc = useLocation(),
     nav = useNavigate(),
-    { movies } = useApp();
+    { movies, lookup } = useApp();
   useEffect(() => {
     setMenu(false);
     setGenres(false);
     window.scrollTo(0, 0);
     const path = loc.pathname.replace(/\/$/, "") || "/";
-    const m = movies.find((x) => path === "/movie/" + x.slug);
+    const m = lookup.find((x) => path === "/movie/" + x.slug);
     document.title =
       (m?.title ||
         (path === "/"
@@ -100,7 +101,7 @@ export function Shell() {
       });
       document.head.append(el);
     }
-  }, [loc.pathname, brand, movies]);
+  }, [loc.pathname, brand, lookup]);
   useEffect(() => {
     function key(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -136,6 +137,7 @@ export function Shell() {
               Home
             </NavLink>
             <NavLink to="/movies">Movies</NavLink>
+            {series.length > 0 && <NavLink to="/series">TV Series</NavLink>}
             <NavLink to="/trending">New &amp; Popular</NavLink>
             <div className="genre-wrap">
               <button
@@ -185,6 +187,15 @@ export function Shell() {
             {!demoMode && !session && (
               <Link className="signin-link" to="/login">
                 Sign in
+              </Link>
+            )}
+            {profile && (
+              <Link
+                aria-label={"Switch profile, current: " + profile.name}
+                className="profilelink"
+                to="/who"
+              >
+                <Avatar p={profile} size={26} />
               </Link>
             )}
             <Link

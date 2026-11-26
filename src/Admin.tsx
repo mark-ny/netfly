@@ -40,6 +40,33 @@ const resources: Resource[] = [
     },
   },
   {
+    label: "Series",
+    table: "series",
+    keys: ["id"],
+    level: 1,
+    fields: {
+      title: "",
+      slug: "",
+      synopsis: "",
+      year: 2026,
+      language: "No dialogue",
+      country: "",
+      classification: "Unrated",
+      poster: "",
+      backdrop: "",
+      state: "draft",
+      release_at: "",
+      featured: false,
+    },
+  },
+  {
+    label: "Episodes",
+    table: "episodes",
+    keys: ["movie_id"],
+    level: 1,
+    fields: { movie_id: "", series_id: "", season: 1, number: 1 },
+  },
+  {
     label: "Media assets",
     table: "video_assets",
     keys: ["movie_id"],
@@ -168,6 +195,9 @@ const labels: Record<string, string> = {
   qualities: "Quality heights (comma separated)",
   value: "Setting value (JSON)",
   featured: "Feature on home",
+  season: "Season number",
+  number: "Episode number",
+  series_id: "Series",
 };
 const enums: Record<string, string[]> = {
   role: ["viewer", "content_manager", "administrator", "super_administrator"],
@@ -176,6 +206,7 @@ const enums: Record<string, string[]> = {
 };
 const refs: Record<string, [string, string]> = {
   movie_id: ["movies", "title"],
+  series_id: ["series", "title"],
   genre_id: ["genres", "name"],
   cast_id: ["cast_members", "name"],
   collection_id: ["collections", "name"],

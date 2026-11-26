@@ -45,3 +45,15 @@ test("local profile preferences and support report export", async ({ page }) => 
   await page.goto("/admin");
   await expect(page.getByText(/provisioned staff account/)).toBeVisible();
 });
+test("series page shows an empty state and hides the nav item without series", async ({ page }) => {
+  await page.goto("/series");
+  await expect(page.getByText("No series yet")).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main" }).getByText("TV Series")).toHaveCount(0);
+  await page.goto("/series/missing");
+  await expect(page.getByText("Series not found")).toBeVisible();
+});
+test("profile picker needs an account", async ({ page }) => {
+  await page.goto("/who");
+  // Without Supabase the app is in local preview mode, so there is no account to pick a profile for.
+  await expect(page).toHaveURL(/\/login/);
+});

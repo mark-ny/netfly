@@ -288,6 +288,96 @@ try {
   await check("maintenance aggregates actual sessions", async () =>
     assert.equal(await count("select sum(plays) n from analytics_daily"), 1),
   );
+  // ---- 1.6.0: viewer profiles and series (written without a Postgres run; see TESTING.md) ----
+  const [seriesId, epOne, epTwo] = [
+    "22222222-2222-4222-8222-000000000001",
+    "22222222-2222-4222-8222-000000000002",
+    "22222222-2222-4222-8222-000000000003",
+  ];
+  await role("service_role");
+  await check("every account has exactly one default profile", async () =>
+    assert.equal(
+      await count(
+        "select count(*) n from viewer_profiles where is_default and account_id in (select id from auth.users)",
+      ),
+      5,
+    ),
+  );
+  await role("authenticated", viewer);
+  await check("a viewer reads only their own profiles", async () =>
+    assert.equal(
+      await count("select count(*) n from viewer_profiles where account_id<>auth.uid()"),
+      0,
+    ),
+  );
+  await check("profiles cannot be created as default or promoted", async () => {
+    await assert.rejects(
+      db.query("insert into viewer_profiles(account_id,name,is_default) values($1,'Sneaky',true)", [viewer]),
+    );
+    await assert.rejects(db.query("update viewer_profiles set is_default=true where not is_default"));
+  });
+  await check("a viewer cannot create a profile for another account", async () =>
+    assert.rejects(db.query("insert into viewer_profiles(account_id,name) values($1,'Intruder')", [other])),
+  );
+  await check("the default profile cannot be deleted", async () => {
+    await db.query("delete from viewer_profiles where is_default");
+    assert.equal(await count("select count(*) n from viewer_profiles where is_default"), 1);
+  });
+  await check("an account is limited to five profiles", async () => {
+    for (const n of ["Two", "Three", "Four", "Five"])
+      await db.query("insert into viewer_profiles(account_id,name) values($1,$2)", [viewer, n]);
+    await assert.rejects(db.query("insert into viewer_profiles(account_id,name) values($1,'Six')", [viewer]));
+  });
+  await check("profile names and colours are validated", async () => {
+    await db.query("delete from viewer_profiles where name='Five'");
+    await assert.rejects(db.query("insert into viewer_profiles(account_id,name) values($1,'   ')", [viewer]));
+    await assert.rejects(db.query("insert into viewer_profiles(account_id,name,avatar) values($1,'Odd','javascript:x')", [viewer]));
+  });
+  await check("watch data is kept separately for each profile", async () => {
+    const [a, b] = (await db.query("select id from viewer_profiles order by is_default desc, name")).rows.map((r) => r.id);
+    await db.query("delete from watchlists");
+    await db.query("insert into watchlists(user_id,profile_id,movie_id) values($1,$2,$3),($1,$4,$3)", [viewer, a, film, b]);
+    assert.equal(await count("select count(*) n from watchlists"), 2);
+    assert.equal(await count("select count(*) n from watchlists where profile_id='" + a + "'"), 1);
+    await db.query("delete from viewer_profiles where id=$1", [b]);
+    assert.equal(await count("select count(*) n from watchlists"), 1);
+  });
+  await check("rows cannot point at another account's profile", async () => {
+    const theirs = (await (async () => { await role("service_role"); const r = await db.query("select id from viewer_profiles where account_id=$1", [other]); await role("authenticated", viewer); return r; })()).rows[0].id;
+    await assert.rejects(
+      db.query("insert into watch_progress(user_id,profile_id,movie_id,position) values($1,$2,$3,5)", [viewer, theirs, film]),
+    );
+  });
+  await role("service_role");
+  await db.query("insert into series(id,title,slug,year,poster,backdrop,state) values($1,'QA series','qa-series',2026,'/art/a.webp','/art/b.webp','draft')", [seriesId]);
+  await db.query("insert into movies(id,title,slug,year,duration,poster,backdrop,state) values($1,'Pilot','qa-pilot',2026,20,'/art/a.webp','/art/b.webp','published'),($2,'Second','qa-second',2026,21,'/art/a.webp','/art/b.webp','published')", [epOne, epTwo]);
+  await db.query("insert into episodes(movie_id,series_id,season,number) values($1,$3,1,1),($2,$3,1,2)", [epOne, epTwo, seriesId]);
+  await check("a draft series and its episodes are hidden from the public", async () => {
+    await role("anon");
+    assert.equal(await count("select count(*) n from series"), 0);
+    assert.equal(await count("select count(*) n from episodes"), 0);
+  });
+  await check("published series expose episodes through the catalog with their series", async () => {
+    await role("service_role");
+    await db.query("update series set state='published' where id=$1", [seriesId]);
+    await role("anon");
+    assert.equal(await count("select count(*) n from series"), 1);
+    assert.equal(await count("select count(*) n from episodes"), 2);
+    assert.equal(await count("select count(*) n from catalog where series_id is not null"), 2);
+    assert.equal(await count("select count(*) n from catalog where series_id is null and slug in ('qa-pilot','qa-second')"), 0);
+  });
+  await check("episode numbers are unique within a season", async () => {
+    await role("service_role");
+    await assert.rejects(db.query("update episodes set number=1 where movie_id=$1", [epTwo]));
+  });
+  await check("only staff can change series and episodes", async () => {
+    await role("authenticated", viewer);
+    await assert.rejects(db.query("insert into series(title,slug,year,poster,backdrop) values('X','x',2026,'/art/a.webp','/art/b.webp')"));
+    assert.equal((await db.query("update series set title='Hacked' returning id")).rows.length, 0);
+    await role("authenticated", manager);
+    assert.equal((await db.query("update series set title='QA series 2' returning id")).rows.length, 1);
+  });
+  await role("service_role");
   console.log(cases + " database policy cases passed");
 } finally {
   await db.close();

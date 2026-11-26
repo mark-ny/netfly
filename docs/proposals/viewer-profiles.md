@@ -1,3 +1,5 @@
+> **Status (1.6.0):** the simplified version (names, colours, per-profile data) was implemented in `supabase/migrations/20261126090000_profiles_series.sql`. Kids mode, PIN and maturity limits below remain proposals.
+
 # Proposal: viewer profiles, kids profile, PIN (needs approval)
 
 SQL: `docs/proposals/viewer-profiles.sql` (not applied, not in `supabase/migrations`).

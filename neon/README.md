@@ -48,3 +48,6 @@ The Neon integration injects connection strings such as `DATABASE_URL` into Verc
 - Staff accounts have **no second factor** until Neon Auth supports one. Mitigate: keep the operator list to one or two people, long unique passwords, review `admin_audit_logs` regularly, and plan to add MFA when available.
 - Neon Auth is still a pre-GA product; check its status before public launch.
 - Neon free plan compute is limited and **suspends when the monthly allowance runs out**, which would stop playback checks. Budget for a paid plan before real traffic.
+
+## Profiles and series (1.6.0)
+After `001_schema.sql`, run `002_profiles_series.sql` (generated with `python3 neon/translate_migration.py supabase/migrations/20261126090000_profiles_series.sql`). Draft and untested, like 001. The app and Worker still use Supabase.
