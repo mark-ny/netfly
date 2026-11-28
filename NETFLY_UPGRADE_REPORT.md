@@ -94,3 +94,23 @@ Viewer-profiles design and SQL (draft, unapplied and unrun), 20-viewer scenario 
 **Verification status**
 - Run: `node --check` on the Worker and tests, the 3 Worker gateway tests (pass), a filtered syntax-level `tsc` over the changed files (only errors caused by missing installed type packages remained).
 - NOT run: `npm run typecheck`, lint, build, Playwright, the PGlite policy suite (including the 15 new cases), the connected Docker test. The migration has never been executed against Postgres. Run them before deploying and send me any failures.
+
+## Round 7 (v1.6.1, untested)
+
+Admin Status filter (server-side, resets paging) for tables with a state or status column; Manage profiles link on the account page. Considered and not built: card hover trailers (extra bandwidth, conflicts with Data saver), skip-intro (needs timestamp columns, a schema change for your approval).
+
+## Round 8 (v1.7.0, untested): skip intro, and what is left
+
+Built: skip-intro markers (migration unapplied, one DB test added, not run). Everything left is blocked on a decision or input from you, so I stopped rather than guess:
+- **Kids profiles, PIN, maturity limits:** need Worker and catalog enforcement (changes the streaming gateway). Proposal in NETFLY_RECOMMENDATIONS.md section 12; say "approve" to have it built.
+- **Neon client and Worker port:** need the output of `neon/00_discover.sql`, package installs enabled, and Cloudflare set up.
+- **Gateway authorization cache, 10-second segments, paid Workers plan:** infrastructure and encoding changes; options in section 4.
+- **Hover trailers:** skipped (bandwidth, conflicts with Data saver).
+- **Everything built since 1.1.0 is unrun.** Run the test commands in TESTING.md first.
+
+## Round 9 (v1.8.0, untested): kids profiles
+
+Built after your "finish it": kids flag on profiles, catalog and series filtered client-side for kids, playback blocked server-side in `start_playback` for ratings above PG (rank mapping `G/GE=0, PG=1, 13=2, 16=3, 18/R=4, anything else=99`). Worker change: one line passing `profile` to `start_playback`; the 3 Worker tests still pass.
+Not built: PIN lock. A PIN checked in the browser would be fake, and a server-checked PIN needs a Worker-issued switching token, a larger change to the gateway. The Kids flag can be turned off by whoever holds the account, so treat it as a guardrail only.
+Still blocked: Neon client/Worker port (needs discovery output, package installs, Cloudflare setup); gateway cache, 10-second segments and paid plan (infrastructure decisions).
+Deploy order for the three new migrations: profiles_series, skip_intro, kids_profiles, in that order, on staging first, then run `npm run test:db`.

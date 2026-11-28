@@ -34,6 +34,8 @@ const resources: Resource[] = [
       poster: "",
       backdrop: "",
       trailer: "",
+      intro_start: 0,
+      intro_end: 0,
       state: "draft",
       release_at: "",
       featured: false,
@@ -195,6 +197,8 @@ const labels: Record<string, string> = {
   qualities: "Quality heights (comma separated)",
   value: "Setting value (JSON)",
   featured: "Feature on home",
+  intro_start: "Intro starts (seconds, 0 = none)",
+  intro_end: "Intro ends (seconds)",
   season: "Season number",
   number: "Episode number",
   series_id: "Series",
@@ -234,6 +238,7 @@ export default function Admin() {
     [pending, setPending] = useState<Row | null>(null),
     [find, setFind] = useState(""),
     [page, setPage] = useState(0),
+    [status, setStatus] = useState(""),
     [busy, setBusy] = useState(false),
     [verified, setVerified] = useState(false),
     [reload, setReload] = useState(0),
@@ -276,9 +281,13 @@ export default function Admin() {
         }
         return;
       }
-      const r = await db!
+      let q0 = db!
         .from(resource.table)
-        .select("*", { count: "exact" })
+        .select("*", { count: "exact" });
+      // Server-side status filter for tables that have a state or status column.
+      const statusField = "state" in resource.fields ? "state" : "status" in resource.fields ? "status" : "";
+      if (statusField && status) q0 = q0.eq(statusField, status);
+      const r = await q0
         .order(
           resource.table === "admin_audit_logs" ||
             resource.table === "user_reports"
@@ -316,7 +325,13 @@ export default function Admin() {
     return () => {
       live = false;
     };
-  }, [tab, page, verified, level, reload, resource]);
+  }, [tab, page, verified, level, reload, resource, status]);
+  useEffect(() => {
+    setStatus("");
+  }, [tab]);
+  useEffect(() => {
+    setPage(0);
+  }, [status]);
   if (demoMode || !session || level < 1)
     return (
       <div className="formpage">
@@ -618,6 +633,17 @@ export default function Admin() {
                 </button>
               </div>
             </form>
+          )}
+          {resource && ("state" in resource.fields || "status" in resource.fields) && (
+            <label className="small">
+              Status
+              <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option value="">All</option>
+                {enums["state" in resource.fields ? "state" : "status"].map((v) => (
+                  <option key={v} value={v}>{v}</option>
+                ))}
+              </select>
+            </label>
           )}
           <label className="small">
             Filter this page

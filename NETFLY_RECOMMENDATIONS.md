@@ -68,7 +68,9 @@ Detailed SQL, rules, tests and rollback are in `docs/proposals/viewer-profiles.m
 
 See `docs/proposals/neon-migration.md`: options (stay on Supabase, full Neon, Neon with the existing sign-in), risks (accounts, staff MFA, Worker rewrite, free-plan compute limits under playback load) and a staged plan with rollback. Nothing has been changed.
 
-## 12. Kids profiles, PIN lock and maturity limits (not implemented)
+## 12. Kids profiles (built in 1.8.0), PIN lock and per-profile maturity levels (not built)
+
+Kids profiles with a PG limit exist now (CHANGELOG 1.8.0). What follows is the remaining PIN and finer maturity-level work.
 
 Profiles (1.6.0) separate lists and history only. Restricting what a profile can see or play is a security feature, so it should be enforced server side:
 1. Add `max_rank` and `is_kids` to `viewer_profiles`, written only through the Worker.

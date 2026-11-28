@@ -43,3 +43,5 @@ Run the smoke script after configuring staging. Sign up through the deployed fro
 ## 1.6.0 additions (never run)
 - `tests/db.mjs`: 15 new cases for profile creation limits, default-profile protection, cross-account profile rejection, per-profile data, series visibility, episode uniqueness and staff-only writes. They load every file in `supabase/migrations/`, so the new migration is exercised by `npm run test:db`.
 - `tests/browser/demo.spec.ts`: series empty state and picker redirect.
+
+- 1.7.0/1.8.0: one DB case each for intro markers and kids playback (`tests/db.mjs`), never run.

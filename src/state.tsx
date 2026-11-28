@@ -23,7 +23,7 @@ import {
   type Profile,
   type Series,
 } from "./api";
-import { demoMode, type Movie } from "./catalog";
+import { classRank, demoMode, kidsMaxRank, type Movie } from "./catalog";
 const storeKey = (kind: string, account: string) =>
   "netfly:" + kind + ":" + account;
 function read(k: string, tab = false) {
@@ -68,8 +68,16 @@ function useStore() {
     activeUser = useRef<string | undefined>(undefined),
     nav = useNavigate();
   const account = session?.user.id;
-  const movies = useMemo(() => all.filter((m) => !m.series_id), [all]),
-    episodes = useMemo(() => all.filter((m) => m.series_id), [all]);
+  const kids = !!profiles.find((p) => p.id === profileId)?.is_kids,
+    // A kids profile hides titles above the kids rating. Playback is also checked in the database.
+    fit = (m: { classification: string }) =>
+      !kids || classRank(m.classification) <= kidsMaxRank,
+    movies = useMemo(
+      () => all.filter((m) => !m.series_id && fit(m)),
+      [all, kids],
+    ),
+    episodes = useMemo(() => all.filter((m) => m.series_id), [all]),
+    visibleSeries = useMemo(() => series.filter(fit), [series, kids]);
   const key = account && profileId ? account + ":" + profileId : undefined;
   function apply(p: Personal) {
     current.current = p;
@@ -279,7 +287,7 @@ function useStore() {
     setChosen(true);
     setProfileId(id);
   }
-  async function addProfile(name: string, avatar: string) {
+  async function addProfile(name: string, avatar: string, is_kids = false) {
     if (!db || !account) return false;
     if (profiles.length >= maxProfiles) {
       setNotice("You can have up to " + maxProfiles + " profiles.");
@@ -287,8 +295,8 @@ function useStore() {
     }
     const { data, error } = await db
       .from("viewer_profiles")
-      .insert({ account_id: account, name: name.trim(), avatar })
-      .select("id,name,avatar,is_default")
+      .insert({ account_id: account, name: name.trim(), avatar, is_kids })
+      .select("id,name,avatar,is_default,is_kids")
       .single();
     if (error) {
       setNotice(error.message);
@@ -297,18 +305,23 @@ function useStore() {
     setProfiles((p) => [...p, data]);
     return true;
   }
-  async function editProfile(id: string, name: string, avatar: string) {
+  async function editProfile(
+    id: string,
+    name: string,
+    avatar: string,
+    is_kids = false,
+  ) {
     if (!db) return false;
     const { error } = await db
       .from("viewer_profiles")
-      .update({ name: name.trim(), avatar })
+      .update({ name: name.trim(), avatar, is_kids })
       .eq("id", id);
     if (error) {
       setNotice(error.message);
       return false;
     }
     setProfiles((p) =>
-      p.map((x) => (x.id === id ? { ...x, name: name.trim(), avatar } : x)),
+      p.map((x) => (x.id === id ? { ...x, name: name.trim(), avatar, is_kids } : x)),
     );
     return true;
   }
@@ -343,7 +356,7 @@ function useStore() {
     addProfile,
     editProfile,
     removeProfile,
-    series,
+    series: visibleSeries,
     episodes,
     lookup: all,
     authReady,

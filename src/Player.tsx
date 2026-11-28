@@ -13,7 +13,7 @@ type Grant = {
   tracks: { label: string; language: string; url: string }[];
 };
 export default function Player({ m }: { m: Movie }) {
-  const { personal, progress, session, episodes, series } = useApp(),
+  const { personal, progress, session, episodes, series, profile } = useApp(),
     nav = useNavigate(),
     container = useRef<HTMLDivElement>(null),
     player = useRef<ReturnType<typeof videojs> | null>(null),
@@ -22,6 +22,7 @@ export default function Player({ m }: { m: Movie }) {
     [options, setOptions] = useState<number[]>([]),
     [quality, setQuality] = useState("auto"),
     [done, setDone] = useState(false),
+    [introNow, setIntroNow] = useState(false),
     [count, setCount] = useState(8),
     saved = useRef(personal.progress[m.id]?.position || 0),
     write = useRef(progress);
@@ -105,7 +106,7 @@ export default function Player({ m }: { m: Movie }) {
               { label: "English", language: "en", url: base + "captions.vtt" },
             ],
           }
-        : await callWorker("/authorize", { movie_id: m.id });
+        : await callWorker("/authorize", { movie_id: m.id, profile_id: profile?.id });
       if (!grant || !active || !container.current) {
         if (grant?.id) void pulse(true);
         return;
@@ -148,6 +149,10 @@ export default function Player({ m }: { m: Movie }) {
         if (!p.paused() && now >= lastPoint && now - lastPoint < 2)
           watched += now - lastPoint;
         lastPoint = now;
+        setIntroNow(
+          !!m.intro_end && m.intro_end > (m.intro_start || 0) &&
+            now >= (m.intro_start || 0) && now < m.intro_end,
+        );
         mark();
       });
       p.on("seeked", () => {
@@ -254,6 +259,17 @@ export default function Player({ m }: { m: Movie }) {
           : ""}
         {m.title}
       </h1>
+      {introNow && (
+        <button
+          className="ghost skipintro"
+          onClick={() => {
+            const p = player.current;
+            if (p && m.intro_end) p.currentTime(m.intro_end);
+          }}
+        >
+          Skip intro
+        </button>
+      )}
       {done && next && (
         <div className="upnext" role="status">
           <span>

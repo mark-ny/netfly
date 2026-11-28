@@ -384,6 +384,11 @@ export function Profile() {
           >
             Sign out
           </button>
+          {!demoMode && (
+            <Link className="ghost" to="/who">
+              Manage profiles
+            </Link>
+          )}
           <button
             className="ghost"
             onClick={async () => {

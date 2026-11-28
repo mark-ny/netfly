@@ -174,6 +174,7 @@ export async function handle(req, e) {
       session_key: session,
       digest: await hashToken(token),
       country_code: country,
+      profile: uuid.test(b.profile_id) ? b.profile_id : null,
     });
     const base = u.origin + "/media/" + token + "/";
     const [subs, assets] = await Promise.all([

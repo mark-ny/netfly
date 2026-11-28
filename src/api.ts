@@ -56,13 +56,14 @@ export type Profile = {
   name: string;
   avatar: string;
   is_default: boolean;
+  is_kids: boolean;
 };
 export const avatars = ["ember", "sky", "leaf", "plum", "sand", "rose"] as const;
 export const maxProfiles = 5;
 export async function loadProfiles(account: string): Promise<Profile[]> {
   const { data, error } = await db!
     .from("viewer_profiles")
-    .select("id,name,avatar,is_default")
+    .select("id,name,avatar,is_default,is_kids")
     .eq("account_id", account)
     .order("created_at");
   if (error) throw error;

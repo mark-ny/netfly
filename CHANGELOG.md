@@ -2,6 +2,20 @@
 
 Versions are documentation labels for upgrade batches. Verification status for each is in NETFLY_UPGRADE_REPORT.md.
 
+## 1.8.0 (untested)
+- Kids profiles: a profile can be marked Kids; the app hides films and series rated above PG for it, and `start_playback` rejects them in the database (the Worker now passes the active profile id)
+- New migration `supabase/migrations/20261127120000_kids_profiles.sql` (not applied; replaces `start_playback` with a version that has an optional profile argument) and `neon/004_kids_profiles.sql`
+- Limits: no PIN, and a profile owner can switch the Kids flag off or call the Worker without a profile id. This is a family guardrail, not a lock against a determined child. Titles rated "Unrated" or with free-text ratings are hidden from kids until you set G, GE or PG.
+- Tests added, not run: one kids playback case in `tests/db.mjs`
+
+## 1.7.0 (untested)
+- Skip intro: `intro_start`/`intro_end` seconds on films and episodes (0 = none), editable in Admin; the player shows a Skip intro button inside the window
+- New migration `supabase/migrations/20261127090000_skip_intro.sql` (not applied; rebuilds the catalog view with two extra columns) and `neon/003_skip_intro.sql`
+
+## 1.6.1 (untested)
+- Admin: server-side Status filter on Films, Series and Reports
+- Account page: Manage profiles link
+
 ## 1.6.0 (untested: no package install, browser or Postgres was available)
 - Viewer profiles: "Who's watching?" picker at `/who`, up to 5 profiles per account, create/rename/colour/delete, profile switcher in the header; list, history and ratings are kept per profile
 - TV series: `/series` and `/series/:slug` with seasons, episode list and progress bars; the player offers the next episode with a cancellable 8 second countdown; admin tabs for Series and Episodes

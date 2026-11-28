@@ -23,7 +23,7 @@ export function WhoIsWatching() {
     [params] = useSearchParams(),
     nav = useNavigate(),
     [manage, setManage] = useState(false),
-    [form, setForm] = useState<{ id?: string; name: string; avatar: string } | null>(null),
+    [form, setForm] = useState<{ id?: string; name: string; avatar: string; is_kids: boolean } | null>(null),
     [removing, setRemoving] = useState<Profile | null>(null),
     [saving, setSaving] = useState(false);
   const next = params.get("next");
@@ -42,12 +42,12 @@ export function WhoIsWatching() {
     e.preventDefault();
     if (!form || !form.name.trim() || saving) return;
     setSaving(true);
-    const ok = form.id ? await editProfile(form.id, form.name, form.avatar) : await addProfile(form.name, form.avatar);
+    const ok = form.id ? await editProfile(form.id, form.name, form.avatar, form.is_kids) : await addProfile(form.name, form.avatar, form.is_kids);
     setSaving(false);
     if (ok) setForm(null);
   }
   function pick(p: Profile) {
-    if (manage) setForm({ id: p.id, name: p.name, avatar: p.avatar });
+    if (manage) setForm({ id: p.id, name: p.name, avatar: p.avatar, is_kids: p.is_kids });
     else {
       chooseProfile(p.id);
       nav(target, { replace: true });
@@ -61,14 +61,14 @@ export function WhoIsWatching() {
           <li key={p.id}>
             <button className={"whocard" + (p.id === profile?.id ? " current" : "")} onClick={() => pick(p)} aria-label={(manage ? "Edit profile " : "Watch as ") + p.name}>
               <Avatar p={p} />
-              <span>{p.name}</span>
+              <span>{p.name}{p.is_kids ? " · Kids" : ""}</span>
               {manage && <Pencil size={14} aria-hidden="true" />}
             </button>
           </li>
         ))}
         {profiles.length < maxProfiles && (
           <li>
-            <button className="whocard add" onClick={() => setForm({ name: "", avatar: avatars[profiles.length % avatars.length] })} aria-label="Add profile">
+            <button className="whocard add" onClick={() => setForm({ name: "", avatar: avatars[profiles.length % avatars.length], is_kids: false })} aria-label="Add profile">
               <span className="avatar add" aria-hidden="true"><Plus /></span>
               <span>Add profile</span>
             </button>
@@ -83,6 +83,10 @@ export function WhoIsWatching() {
           <label>
             Name
             <input value={form.name} maxLength={30} required autoFocus onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          </label>
+          <label className="checkline">
+            <input type="checkbox" checked={form.is_kids} onChange={(e) => setForm({ ...form, is_kids: e.target.checked })} />
+            Kids profile (hides films rated above PG and blocks playing them)
           </label>
           <fieldset>
             <legend>Colour</legend>

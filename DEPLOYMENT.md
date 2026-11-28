@@ -83,3 +83,5 @@ The separate npm run test:connected harness creates temporary loopback Docker se
 1. Apply `supabase/migrations/20261126090000_profiles_series.sql` to a staging project and run `npm run test:db`.
 2. Deploy the 1.6.0 client and the Worker together with the migration (the primary keys of the personal tables change).
 3. Check: sign in, pick or add a profile, save a film, switch profile and confirm the list is separate.
+
+Migrations 1.7.0 and 1.8.0 (`20261127090000_skip_intro.sql`, `20261127120000_kids_profiles.sql`) apply after the 1.6.0 one. Deploy the Worker with 1.8.0: it now sends `profile` to `start_playback`.

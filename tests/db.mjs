@@ -378,6 +378,22 @@ try {
     assert.equal((await db.query("update series set title='QA series 2' returning id")).rows.length, 1);
   });
   await role("service_role");
+  await check("intro markers must be ordered and are exposed by the catalog", async () => {
+    await role("service_role");
+    await assert.rejects(db.query("update movies set intro_start=30,intro_end=10 where id=$1", [epOne]));
+    await db.query("update movies set intro_start=5,intro_end=45 where id=$1", [epOne]);
+    assert.equal(await count("select count(*) n from catalog where intro_end=45"), 1);
+  });
+  await check("a kids profile cannot start playback of films rated above PG", async () => {
+    await role("service_role");
+    await db.query("delete from viewer_profiles where account_id=$1 and not is_default", [viewer]);
+    const kid = (await db.query("insert into viewer_profiles(account_id,name,is_kids) values($1,'Kid',true) returning id", [viewer])).rows[0].id;
+    await db.query("update movies set classification='16' where id=$1", [film]);
+    await assert.rejects(db.query("select start_playback($1,$2,$3,$4,'KE',$5)", [viewer, film, session, "kids-digest-1", kid]));
+    await db.query("update movies set classification='PG' where id=$1", [film]);
+    await db.query("select start_playback($1,$2,$3,$4,'KE',$5)", [viewer, film, session, "kids-digest-2", kid]);
+    await db.query("delete from playback_sessions where token_hash like 'kids-digest-%'");
+  });
   console.log(cases + " database policy cases passed");
 } finally {
   await db.close();
